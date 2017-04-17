@@ -12,6 +12,22 @@ local on_init = function()
     }
 end
 
+local imguiProgressBar = function(progress, r, g, b, a)
+    r = r or 0.90
+    g = g or 0.70
+    b = b or 0.00
+    a = a or 1.00
+
+    if progress == nil then
+        imgui.Text("imguiProgressBar() Invalid progress")
+        return
+    end
+
+    imgui.PushStyleColor("PlotHistogram", r, g, b, a)
+    imgui.ProgressBar(progress)
+    imgui.PopStyleColor()
+end
+
 local DrawStuff = function()
     myIndex = pso.read_u32(_PlayerMyIndex)
     myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
@@ -44,7 +60,7 @@ local DrawStuff = function()
             levelProgress = thisLevelExp / nextLevelexp
         end
 
-        imgui.ProgressBar(levelProgress)
+        imguiProgressBar(levelProgress, 0.0, 0.7, 1.0, 1.0)
         imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
     end
 end
