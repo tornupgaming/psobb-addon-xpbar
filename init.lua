@@ -3,14 +3,6 @@ local _PlayerArray = 0x00A94254
 local _PlayerMyIndex = 0x00A9C4F4
 local _PLTPointer = 0x00A94878
 
--- Init
-local on_init = function()
-    return {
-        name = "ExperienceBar",
-        version = "1.1",
-        author = "tornupgaming"
-    }
-end
 
 local imguiProgressBar = function(progress, r, g, b, a)
     r = r or 0.90
@@ -66,17 +58,29 @@ local DrawStuff = function()
 end
 
 -- Drawing
-local on_present = function()
+local function present()
     imgui.Begin("Experience Bar")
     DrawStuff();
     imgui.End()
 end
 
--- Entry Point
-pso.on_init(on_init)
-pso.on_present(on_present)
+-- Init
+local function init()
+    return
+    {
+        name = "Experience Bar",
+        version = "1.2",
+        author = "tornupgaming",
+        description = "Work in progress",
+        present = present,
+    }
+end
 
 -- Exports for other modules
-return {
-    init = on_init
+return
+{
+    __addon =
+    {
+        init = init
+    }
 }
