@@ -21,9 +21,9 @@ local imguiProgressBar = function(progress, r, g, b, a)
 end
 
 local DrawStuff = function()
-    myIndex = pso.read_u32(_PlayerMyIndex)
-    myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
-    pltData = pso.read_u32(_PLTPointer)
+    local myIndex = pso.read_u32(_PlayerMyIndex)
+    local myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
+    local pltData = pso.read_u32(_PLTPointer)
 
     -- Do the thing only if the pointer is not null
     if myAddress == 0 then
@@ -31,23 +31,25 @@ local DrawStuff = function()
     elseif pltData == 0 then
         imgui.Text("PLT data not found")
     else
-        myClass = pso.read_u8(myAddress + 0x961)
-        myLevel = pso.read_u32(myAddress + 0xE44)
-        myExp = pso.read_u32(myAddress + 0xE48)
+        local myClass = pso.read_u8(myAddress + 0x961)
+        local myLevel = pso.read_u32(myAddress + 0xE44)
+        local myExp = pso.read_u32(myAddress + 0xE48)
 
-        pltLevels = pso.read_u32(pltData)
-        pltClass = pso.read_u32(pltLevels + 4 * myClass)
-        
-        thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * myLevel + 0x08)
+        local pltLevels = pso.read_u32(pltData)
+        local pltClass = pso.read_u32(pltLevels + 4 * myClass)
+
+        local thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * myLevel + 0x08)
+        local nextMaxLevelexp
+
         if myLevel < 199 then
             nextMaxLevelexp = pso.read_u32(pltClass + 0x0C * (myLevel + 1) + 0x08)
         else
             nextMaxLevelexp = thisMaxLevelExp
         end
 
-        thisLevelExp = myExp - thisMaxLevelExp
-        nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
-        levelProgress = 1
+        local thisLevelExp = myExp - thisMaxLevelExp
+        local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
+        local levelProgress = 1
         if nextLevelexp ~= 0 then
             levelProgress = thisLevelExp / nextLevelexp
         end
