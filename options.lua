@@ -2,7 +2,8 @@ return {
     configurationEnableWindow = false,
     enable = true,
 
-    mhpEnableWindow = true,
-    mhpChanged = true,
-    mhpNoTitleBar = "NoTitleBar",
+    xpEnableWindow = true,
+    xpNoTitleBar = "",
+    xpNoResize = "",
+    xpEnableInfoText = true
 }

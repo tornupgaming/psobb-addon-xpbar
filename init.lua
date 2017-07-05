@@ -15,17 +15,19 @@ if optionsLoaded then
     -- If options loaded, make sure we have all those we need
     options.configurationEnableWindow = options.configurationEnableWindow == nil and true or options.configurationEnableWindow
     options.enable = options.enable == nil and true or options.enable
-    options.mhpEnableWindow = options.mhpEnableWindow == nil and true or options.mhpEnableWindow
-    options.mhpChanged = options.mhpChanged == nil and true or options.mhpChanged
-    options.mhpNoTitleBar = options.mhpNoTitleBar or ""
+    options.xpEnableWindow = options.xpEnableWindow == nil and true or options.xpEnableWindow
+    options.xpNoTitleBar = options.xpNoTitleBar or ""
+    options.xpNoResize = options.xpNoResize or ""
+    options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
 else
     options = 
     {
         configurationEnableWindow = true,
         enable = true,
-        mhpEnableWindow = true,
-        mhpChanged = false,
-        mhpNoTitleBar = ""
+        xpEnableWindow = true,
+        xpNoTitleBar = "",
+        xpNoResize = "",
+        xpEnableInfoText = true
     }
 end
 
@@ -38,9 +40,10 @@ local function SaveOptions(options)
         io.write(string.format("    configurationEnableWindow = %s,\n", tostring(options.configurationEnableWindow)))
         io.write(string.format("    enable = %s,\n", tostring(options.enable)))
         io.write("\n")
-        io.write(string.format("    mhpEnableWindow = %s,\n", tostring(options.mhpEnableWindow)))
-        io.write(string.format("    mhpChanged = %s,\n", tostring(options.mhpChanged)))
-        io.write(string.format("    mhpNoTitleBar = \"%s\",\n", options.mhpNoTitleBar))
+        io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
+        io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
+        io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
+        io.write(string.format("    xpEnableInfoText = %s\n", tostring(options.xpEnableInfoText)))
         io.write("}\n")
 
         io.close(file)
@@ -98,7 +101,9 @@ local DrawStuff = function()
         end
 
         imguiProgressBar(levelProgress, 0.0, 0.7, 1.0, 1.0)
-        imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
+        if options.xpEnableInfoText then
+            imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
+        end
     end
 end
 
@@ -123,8 +128,8 @@ local function present()
         return
     end
 
-    if options.mhpEnableWindow then
-        imgui.Begin("Experience Bar", nil, options.mhpNoTitleBar)
+    if options.xpEnableWindow then
+        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize })
         DrawStuff();
         imgui.End()
     end
@@ -132,7 +137,7 @@ end
 
 -- Init
 local function init()
-ConfigurationWindow = cfg.ConfigurationWindow(options)
+    ConfigurationWindow = cfg.ConfigurationWindow(options)
 
     local function mainMenuButtonHandler()
         ConfigurationWindow.open = not ConfigurationWindow.open
@@ -144,9 +149,9 @@ ConfigurationWindow = cfg.ConfigurationWindow(options)
     return
     {
         name = "Experience Bar",
-        version = "1.2",
+        version = "1.3",
         author = "tornupgaming",
-        description = "Work in progress",
+        description = "Displays your current character experience in a handy visual bar.",
         present = present,
     }
 end

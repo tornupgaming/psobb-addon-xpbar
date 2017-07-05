@@ -12,17 +12,31 @@ local function ConfigurationWindow(configuration)
     local _showWindowSettings = function()
         local success
         
-        if imgui.Checkbox("Enable", _configuration.mhpEnableWindow) then
-            _configuration.mhpEnableWindow = not _configuration.mhpEnableWindow
+        if imgui.Checkbox("Enable", _configuration.xpEnableWindow) then
+            _configuration.xpEnableWindow = not _configuration.xpEnableWindow
             this.changed = true
         end
         
-        if imgui.Checkbox("No title bar", _configuration.mhpNoTitleBar == "NoTitleBar") then
-            if _configuration.mhpNoTitleBar == "NoTitleBar" then
-                _configuration.mhpNoTitleBar = ""
+        if imgui.Checkbox("No title bar", _configuration.xpNoTitleBar == "NoTitleBar") then
+            if _configuration.xpNoTitleBar == "NoTitleBar" then
+                _configuration.xpNoTitleBar = ""
             else
-                _configuration.mhpNoTitleBar = "NoTitleBar"
+                _configuration.xpNoTitleBar = "NoTitleBar"
             end
+            this.changed = true
+        end
+
+        if imgui.Checkbox("No resize", _configuration.xpNoResize == "NoResize") then
+            if _configuration.xpNoResize == "NoResize" then
+                _configuration.xpNoResize = ""
+            else
+                _configuration.xpNoResize = "NoResize"
+            end
+            this.changed = true
+        end
+
+        if imgui.Checkbox("Enable Info Text", _configuration.xpEnableInfoText) then
+            _configuration.xpEnableInfoText = not _configuration.xpEnableInfoText
             this.changed = true
         end
     
