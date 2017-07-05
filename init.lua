@@ -1,8 +1,51 @@
+-- Imports
+local core_mainmenu = require("core_mainmenu")
+local cfg = require("XpBar.configuration")
+-- TODO move to options
+local optionsLoaded, options = pcall(require, "XpBar.options")
+
+local optionsFileName = "addons/XpBar/options.lua"
+
 -- Constants
 local _PlayerArray = 0x00A94254
 local _PlayerMyIndex = 0x00A9C4F4
 local _PLTPointer = 0x00A94878
 
+if optionsLoaded then
+    -- If options loaded, make sure we have all those we need
+    options.configurationEnableWindow = options.configurationEnableWindow == nil and true or options.configurationEnableWindow
+    options.enable = options.enable == nil and true or options.enable
+    options.mhpEnableWindow = options.mhpEnableWindow == nil and true or options.mhpEnableWindow
+    options.mhpChanged = options.mhpChanged == nil and true or options.mhpChanged
+    options.mhpNoTitleBar = options.mhpNoTitleBar or ""
+else
+    options = 
+    {
+        configurationEnableWindow = true,
+        enable = true,
+        mhpEnableWindow = true,
+        mhpChanged = false,
+        mhpNoTitleBar = ""
+    }
+end
+
+local function SaveOptions(options)
+    local file = io.open(optionsFileName, "w")
+    if file ~= nil then
+        io.output(file)
+
+        io.write("return {\n")
+        io.write(string.format("    configurationEnableWindow = %s,\n", tostring(options.configurationEnableWindow)))
+        io.write(string.format("    enable = %s,\n", tostring(options.enable)))
+        io.write("\n")
+        io.write(string.format("    mhpEnableWindow = %s,\n", tostring(options.mhpEnableWindow)))
+        io.write(string.format("    mhpChanged = %s,\n", tostring(options.mhpChanged)))
+        io.write(string.format("    mhpNoTitleBar = \"%s\",\n", options.mhpNoTitleBar))
+        io.write("}\n")
+
+        io.close(file)
+    end
+end
 
 local imguiProgressBar = function(progress, r, g, b, a)
     r = r or 0.90
@@ -59,13 +102,43 @@ end
 
 -- Drawing
 local function present()
-    imgui.Begin("Experience Bar")
-    DrawStuff();
-    imgui.End()
+
+-- If the addon has never been used, open the config window
+    -- and disable the config window setting
+    if options.configurationEnableWindow then
+        ConfigurationWindow.open = true
+        options.configurationEnableWindow = false
+    end
+
+    ConfigurationWindow.Update()
+    if ConfigurationWindow.changed then
+        ConfigurationWindow.changed = false
+        SaveOptions(options)
+    end
+
+    -- Global enable here to let the configuration window work
+    if options.enable == false then
+        return
+    end
+
+    if options.mhpEnableWindow then
+        imgui.Begin("Experience Bar", nil, options.mhpNoTitleBar)
+        DrawStuff();
+        imgui.End()
+    end
 end
 
 -- Init
 local function init()
+ConfigurationWindow = cfg.ConfigurationWindow(options)
+
+    local function mainMenuButtonHandler()
+        ConfigurationWindow.open = not ConfigurationWindow.open
+    end
+
+    core_mainmenu.add_button("XP Bar", mainMenuButtonHandler)
+
+
     return
     {
         name = "Experience Bar",
