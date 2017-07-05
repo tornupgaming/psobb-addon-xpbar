@@ -3,7 +3,7 @@ return {
     enable = true,
 
     xpEnableWindow = true,
-    xpNoTitleBar = "",
-    xpNoResize = "",
-    xpEnableInfoText = true
+    xpNoTitleBar = "NoTitleBar",
+    xpNoResize = "NoResize",
+    xpEnableInfoText = false
 }
