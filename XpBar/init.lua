@@ -20,6 +20,7 @@ if optionsLoaded then
     options.xpNoResize = options.xpNoResize or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
+    options.xpBarColor = options.xpBarColor or 0xE6B300FF
 else
     options = 
     {
@@ -29,7 +30,8 @@ else
         xpNoTitleBar = "",
         xpNoResize = "",
         xpEnableInfoText = true,
-        xpTransparent = false
+        xpTransparent = false,
+        xpBarColor = 0xE6B300FF,
     }
 end
 
@@ -45,8 +47,9 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
-        io.write(string.format("    xpEnableInfoText = %s\n", tostring(options.xpEnableInfoText)))
-        io.write(string.format("    xpTransparent = %s\n", tostring(options.xpTransparent)))
+        io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
+        io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
+        io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
         io.write("}\n")
 
         io.close(file)
