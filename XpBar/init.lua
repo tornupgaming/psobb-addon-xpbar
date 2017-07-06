@@ -20,6 +20,10 @@ if optionsLoaded then
     options.xpNoResize = options.xpNoResize or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
+    options.xpBarColor = options.xpBarColor or 0xFFE6B300
+    options.xpBarWidth = options.xpBarWidth or -1
+    options.xpBarHeight = options.xpBarHeight or 0
+    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
 else
     options = 
     {
@@ -29,7 +33,11 @@ else
         xpNoTitleBar = "",
         xpNoResize = "",
         xpEnableInfoText = true,
-        xpTransparent = false
+        xpTransparent = false,
+        xpBarColor = 0xFFE6B300,
+        xpBarWidth = -1,
+        xpBarHeight = 0,
+        xpBarNoOverlay = false,
     }
 end
 
@@ -45,27 +53,45 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
-        io.write(string.format("    xpEnableInfoText = %s\n", tostring(options.xpEnableInfoText)))
-        io.write(string.format("    xpTransparent = %s\n", tostring(options.xpTransparent)))
+        io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
+        io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
+        io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
+        io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
+        io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
         io.write("}\n")
 
         io.close(file)
     end
 end
 
-local imguiProgressBar = function(progress, r, g, b, a)
-    r = r or 0.90
-    g = g or 0.70
-    b = b or 0.00
-    a = a or 1.00
+local function GetColorAsFloats(color)
+    color = color or 0xFFFFFFFF
+
+    local a = bit.band(bit.rshift(color, 24), 0xFF) / 255;
+    local r = bit.band(bit.rshift(color, 16), 0xFF) / 255;
+    local g = bit.band(bit.rshift(color, 8), 0xFF) / 255;
+    local b = bit.band(color, 0xFF) / 255;
+
+    return { r = r, g = g, b = b, a = a }
+end
+
+local imguiProgressBar = function(progress, color)
+    color = color or 0xE6B300FF
 
     if progress == nil then
         imgui.Text("imguiProgressBar() Invalid progress")
         return
     end
 
-    imgui.PushStyleColor("PlotHistogram", r, g, b, a)
-    imgui.ProgressBar(progress)
+    local overlay = nil
+    if options.xpBarNoOverlay then
+        overlay = ""
+    end
+
+    c = GetColorAsFloats(color)
+    imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
+    imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
     imgui.PopStyleColor()
 end
 
@@ -103,7 +129,7 @@ local DrawStuff = function()
             levelProgress = thisLevelExp / nextLevelexp
         end
 
-        imguiProgressBar(levelProgress, 0.0, 0.7, 1.0, 1.0)
+        imguiProgressBar(levelProgress, options.xpBarColor)
         if options.xpEnableInfoText then
             imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
         end
