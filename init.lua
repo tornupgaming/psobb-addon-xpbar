@@ -19,6 +19,7 @@ if optionsLoaded then
     options.xpNoTitleBar = options.xpNoTitleBar or ""
     options.xpNoResize = options.xpNoResize or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
+    options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
 else
     options = 
     {
@@ -27,7 +28,8 @@ else
         xpEnableWindow = true,
         xpNoTitleBar = "",
         xpNoResize = "",
-        xpEnableInfoText = true
+        xpEnableInfoText = true,
+        xpTransparent = false
     }
 end
 
@@ -44,6 +46,7 @@ local function SaveOptions(options)
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpEnableInfoText = %s\n", tostring(options.xpEnableInfoText)))
+        io.write(string.format("    xpTransparent = %s\n", tostring(options.xpTransparent)))
         io.write("}\n")
 
         io.close(file)
@@ -128,10 +131,18 @@ local function present()
         return
     end
 
+    if options.xpTransparent then
+        imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
+    end
+
     if options.xpEnableWindow then
         imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize })
         DrawStuff();
         imgui.End()
+    end
+
+    if options.xpTransparent then
+        imgui.PopStyleColor(1)
     end
 end
 

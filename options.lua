@@ -6,4 +6,5 @@ return {
     xpNoTitleBar = "NoTitleBar",
     xpNoResize = "NoResize",
     xpEnableInfoText = false
+    xpTransparent = false
 }

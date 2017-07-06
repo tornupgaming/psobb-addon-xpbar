@@ -39,6 +39,13 @@ local function ConfigurationWindow(configuration)
             _configuration.xpEnableInfoText = not _configuration.xpEnableInfoText
             this.changed = true
         end
+
+        if imgui.Checkbox("Transparent Background", _configuration.xpTransparent) then
+            _configuration.xpTransparent = not _configuration.xpTransparent
+            this.changed = true
+        end
+
+        
     
     end
 
