@@ -104,6 +104,24 @@ local function ConfigurationWindow(configuration)
         if oldColor ~= _configuration.xpBarColor then
             this.changed = true
         end
+
+        imgui.PushItemWidth(110)
+        changedDragInt, _configuration.xpBarWidth = imgui.DragInt("##W", _configuration.xpBarWidth, 1.0, -1, 1920, "Width: %3.0f")
+        if changedDragInt then
+            this.changed = true
+        end
+
+        imgui.SameLine(0, 5)
+        changedDragInt, _configuration.xpBarHeight = imgui.DragInt("##H", _configuration.xpBarHeight, 1.0, 0, 1080, "Height: %3.0f")
+        if changedDragInt then
+            this.changed = true
+        end
+        imgui.PopItemWidth()
+
+        if imgui.Checkbox("XP bar no overlay", _configuration.xpBarNoOverlay) then
+            _configuration.xpBarNoOverlay = not _configuration.xpBarNoOverlay
+            this.changed = true
+        end
     end
 
     this.Update = function()

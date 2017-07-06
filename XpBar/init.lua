@@ -21,6 +21,9 @@ if optionsLoaded then
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
     options.xpBarColor = options.xpBarColor or 0xFFE6B300
+    options.xpBarWidth = options.xpBarWidth or -1
+    options.xpBarHeight = options.xpBarHeight or 0
+    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
 else
     options = 
     {
@@ -32,6 +35,9 @@ else
         xpEnableInfoText = true,
         xpTransparent = false,
         xpBarColor = 0xFFE6B300,
+        xpBarWidth = -1,
+        xpBarHeight = 0,
+        xpBarNoOverlay = false,
     }
 end
 
@@ -50,6 +56,9 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
         io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
+        io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
+        io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
         io.write("}\n")
 
         io.close(file)
@@ -75,9 +84,14 @@ local imguiProgressBar = function(progress, color)
         return
     end
 
+    local overlay = nil
+    if options.xpBarNoOverlay then
+        overlay = ""
+    end
+
     c = GetColorAsFloats(color)
     imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
-    imgui.ProgressBar(progress)
+    imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
     imgui.PopStyleColor()
 end
 
