@@ -160,7 +160,7 @@ local function init()
     return
     {
         name = "Experience Bar",
-        version = "1.3",
+        version = "1.4",
         author = "tornupgaming",
         description = "Displays your current character experience in a handy visual bar.",
         present = present,
