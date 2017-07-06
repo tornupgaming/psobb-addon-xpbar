@@ -20,7 +20,7 @@ if optionsLoaded then
     options.xpNoResize = options.xpNoResize or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
-    options.xpBarColor = options.xpBarColor or 0xE6B300FF
+    options.xpBarColor = options.xpBarColor or 0xFFE6B300
 else
     options = 
     {
@@ -31,7 +31,7 @@ else
         xpNoResize = "",
         xpEnableInfoText = true,
         xpTransparent = false,
-        xpBarColor = 0xE6B300FF,
+        xpBarColor = 0xFFE6B300,
     }
 end
 
@@ -56,18 +56,27 @@ local function SaveOptions(options)
     end
 end
 
-local imguiProgressBar = function(progress, r, g, b, a)
-    r = r or 0.90
-    g = g or 0.70
-    b = b or 0.00
-    a = a or 1.00
+local function GetColorAsFloats(color)
+    color = color or 0xFFFFFFFF
+
+    local a = bit.band(bit.rshift(color, 24), 0xFF) / 255;
+    local r = bit.band(bit.rshift(color, 16), 0xFF) / 255;
+    local g = bit.band(bit.rshift(color, 8), 0xFF) / 255;
+    local b = bit.band(color, 0xFF) / 255;
+
+    return { r = r, g = g, b = b, a = a }
+end
+
+local imguiProgressBar = function(progress, color)
+    color = color or 0xE6B300FF
 
     if progress == nil then
         imgui.Text("imguiProgressBar() Invalid progress")
         return
     end
 
-    imgui.PushStyleColor("PlotHistogram", r, g, b, a)
+    c = GetColorAsFloats(color)
+    imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
     imgui.ProgressBar(progress)
     imgui.PopStyleColor()
 end
@@ -106,7 +115,7 @@ local DrawStuff = function()
             levelProgress = thisLevelExp / nextLevelexp
         end
 
-        imguiProgressBar(levelProgress, 0.0, 0.7, 1.0, 1.0)
+        imguiProgressBar(levelProgress, options.xpBarColor)
         if options.xpEnableInfoText then
             imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
         end
