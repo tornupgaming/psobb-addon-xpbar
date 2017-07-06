@@ -5,6 +5,6 @@ return {
     xpEnableWindow = true,
     xpNoTitleBar = "NoTitleBar",
     xpNoResize = "NoResize",
-    xpEnableInfoText = false
-    xpTransparent = false
+    xpEnableInfoText = true
+    xpTransparent = true
 }
