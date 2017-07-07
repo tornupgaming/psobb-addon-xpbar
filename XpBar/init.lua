@@ -102,9 +102,13 @@ local DrawStuff = function()
 
     -- Do the thing only if the pointer is not null
     if myAddress == 0 then
-        imgui.Text("Player data not found")
+        if options.xpEnableInfoText then
+            imgui.Text("Player data not found")
+        end
     elseif pltData == 0 then
-        imgui.Text("PLT data not found")
+        if options.xpEnableInfoText then
+            imgui.Text("PLT data not found")
+        end
     else
         local myClass = pso.read_u8(myAddress + 0x961)
         local myLevel = pso.read_u32(myAddress + 0xE44)
