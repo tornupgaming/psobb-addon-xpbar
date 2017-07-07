@@ -6,4 +6,4 @@ x64
 *.VC.opendb
 *.vcxproj.user
 
-XpBar/options.lua
+/XpBar/options.lua
