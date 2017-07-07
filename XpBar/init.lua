@@ -166,7 +166,7 @@ local function present()
     end
 
     if options.xpEnableWindow then
-        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize })
+        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, "AlwaysAutoResize" })
         DrawStuff();
         imgui.End()
     end
