@@ -21,6 +21,8 @@ if optionsLoaded then
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
     options.xpBarColor = options.xpBarColor or 0xFFE6B300
+    options.xpBarX = options.xpBarX or 50
+    options.xpBarY = options.xpBarY or 50
     options.xpBarWidth = options.xpBarWidth or -1
     options.xpBarHeight = options.xpBarHeight or 0
     options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
@@ -35,6 +37,8 @@ else
         xpEnableInfoText = true,
         xpTransparent = false,
         xpBarColor = 0xFFE6B300,
+        xpBarW = 50,
+        xpBarY = 50,
         xpBarWidth = -1,
         xpBarHeight = 0,
         xpBarNoOverlay = false,
@@ -56,6 +60,8 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
         io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("    xpBarX = %f,\n", options.xpBarX))
+        io.write(string.format("    xpBarY = %f,\n", options.xpBarY))
         io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
         io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
         io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
@@ -142,7 +148,7 @@ end
 
 -- Drawing
 local function present()
-
+    local changedOptions = false
 -- If the addon has never been used, open the config window
     -- and disable the config window setting
     if options.configurationEnableWindow then
@@ -152,6 +158,7 @@ local function present()
 
     ConfigurationWindow.Update()
     if ConfigurationWindow.changed then
+        changedOptions = true
         ConfigurationWindow.changed = false
         SaveOptions(options)
     end
@@ -166,6 +173,10 @@ local function present()
     end
 
     if options.xpEnableWindow then
+        if changedOptions == true then
+            changedOptions = false
+            imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");
+        end
         imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, "AlwaysAutoResize" })
         DrawStuff();
         imgui.End()
