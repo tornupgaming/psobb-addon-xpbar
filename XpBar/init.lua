@@ -18,6 +18,7 @@ if optionsLoaded then
     options.xpEnableWindow = options.xpEnableWindow == nil and true or options.xpEnableWindow
     options.xpNoTitleBar = options.xpNoTitleBar or ""
     options.xpNoResize = options.xpNoResize or ""
+    options.xpNoMove = options.xpNoMove or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
     options.xpBarColor = options.xpBarColor or 0xFFE6B300
@@ -34,6 +35,7 @@ else
         xpEnableWindow = true,
         xpNoTitleBar = "",
         xpNoResize = "",
+        xpNoMove = "",
         xpEnableInfoText = true,
         xpTransparent = false,
         xpBarColor = 0xFFE6B300,
@@ -57,6 +59,7 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
+        io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
         io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
         io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
@@ -177,7 +180,7 @@ local function present()
             changedOptions = false
             imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");
         end
-        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, "AlwaysAutoResize" })
+        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, options.xpNoMove, "AlwaysAutoResize" })
         DrawStuff();
         imgui.End()
     end

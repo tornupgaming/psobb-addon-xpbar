@@ -88,6 +88,14 @@ local function ConfigurationWindow(configuration)
             end
             this.changed = true
         end
+        if imgui.Checkbox("No Move", _configuration.xpNoMove == "NoMove") then
+            if _configuration.xpNoMove == "NoMove" then
+                _configuration.xpNoMove = ""
+            else
+                _configuration.xpNoMove = "NoMove"
+            end
+            this.changed = true
+        end
 
         if imgui.Checkbox("Enable Info Text", _configuration.xpEnableInfoText) then
             _configuration.xpEnableInfoText = not _configuration.xpEnableInfoText
