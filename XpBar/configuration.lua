@@ -88,6 +88,14 @@ local function ConfigurationWindow(configuration)
             end
             this.changed = true
         end
+        if imgui.Checkbox("No Move", _configuration.xpNoMove == "NoMove") then
+            if _configuration.xpNoMove == "NoMove" then
+                _configuration.xpNoMove = ""
+            else
+                _configuration.xpNoMove = "NoMove"
+            end
+            this.changed = true
+        end
 
         if imgui.Checkbox("Enable Info Text", _configuration.xpEnableInfoText) then
             _configuration.xpEnableInfoText = not _configuration.xpEnableInfoText
@@ -106,13 +114,24 @@ local function ConfigurationWindow(configuration)
         end
 
         imgui.PushItemWidth(110)
-        changedDragInt, _configuration.xpBarWidth = imgui.DragInt("##W", _configuration.xpBarWidth, 1.0, -1, 1920, "Width: %3.0f")
+        changedDragInt, _configuration.xpBarX = imgui.DragInt("##X", _configuration.xpBarX, 1.0, 0, 0, "X: %4.0f")
+        if changedDragInt then
+            this.changed = true
+        end
+        
+        imgui.SameLine(0, 5)
+        changedDragInt, _configuration.xpBarY = imgui.DragInt("##Y", _configuration.xpBarY, 1.0, 0, 0, "Y: %4.0f")
+        if changedDragInt then
+            this.changed = true
+        end
+
+        changedDragInt, _configuration.xpBarWidth = imgui.DragInt("##W", _configuration.xpBarWidth, 1.0, -1, 1920, "Width: %4.0f")
         if changedDragInt then
             this.changed = true
         end
 
         imgui.SameLine(0, 5)
-        changedDragInt, _configuration.xpBarHeight = imgui.DragInt("##H", _configuration.xpBarHeight, 1.0, 0, 1080, "Height: %3.0f")
+        changedDragInt, _configuration.xpBarHeight = imgui.DragInt("##H", _configuration.xpBarHeight, 1.0, 0, 1080, "Height: %4.0f")
         if changedDragInt then
             this.changed = true
         end

@@ -18,9 +18,12 @@ if optionsLoaded then
     options.xpEnableWindow = options.xpEnableWindow == nil and true or options.xpEnableWindow
     options.xpNoTitleBar = options.xpNoTitleBar or ""
     options.xpNoResize = options.xpNoResize or ""
+    options.xpNoMove = options.xpNoMove or ""
     options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
     options.xpBarColor = options.xpBarColor or 0xFFE6B300
+    options.xpBarX = options.xpBarX or 50
+    options.xpBarY = options.xpBarY or 50
     options.xpBarWidth = options.xpBarWidth or -1
     options.xpBarHeight = options.xpBarHeight or 0
     options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
@@ -32,9 +35,12 @@ else
         xpEnableWindow = true,
         xpNoTitleBar = "",
         xpNoResize = "",
+        xpNoMove = "",
         xpEnableInfoText = true,
         xpTransparent = false,
         xpBarColor = 0xFFE6B300,
+        xpBarW = 50,
+        xpBarY = 50,
         xpBarWidth = -1,
         xpBarHeight = 0,
         xpBarNoOverlay = false,
@@ -53,9 +59,12 @@ local function SaveOptions(options)
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
+        io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
         io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
         io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("    xpBarX = %f,\n", options.xpBarX))
+        io.write(string.format("    xpBarY = %f,\n", options.xpBarY))
         io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
         io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
         io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
@@ -102,9 +111,13 @@ local DrawStuff = function()
 
     -- Do the thing only if the pointer is not null
     if myAddress == 0 then
-        imgui.Text("Player data not found")
+        if options.xpEnableInfoText then
+            imgui.Text("Player data not found")
+        end
     elseif pltData == 0 then
-        imgui.Text("PLT data not found")
+        if options.xpEnableInfoText then
+            imgui.Text("PLT data not found")
+        end
     else
         local myClass = pso.read_u8(myAddress + 0x961)
         local myLevel = pso.read_u32(myAddress + 0xE44)
@@ -138,7 +151,7 @@ end
 
 -- Drawing
 local function present()
-
+    local changedOptions = false
 -- If the addon has never been used, open the config window
     -- and disable the config window setting
     if options.configurationEnableWindow then
@@ -148,6 +161,7 @@ local function present()
 
     ConfigurationWindow.Update()
     if ConfigurationWindow.changed then
+        changedOptions = true
         ConfigurationWindow.changed = false
         SaveOptions(options)
     end
@@ -162,7 +176,11 @@ local function present()
     end
 
     if options.xpEnableWindow then
-        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize })
+        if changedOptions == true then
+            changedOptions = false
+            imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");
+        end
+        imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, options.xpNoMove, "AlwaysAutoResize" })
         DrawStuff();
         imgui.End()
     end
