@@ -39,7 +39,7 @@ else
         xpEnableInfoText = true,
         xpTransparent = false,
         xpBarColor = 0xFFE6B300,
-        xpBarW = 50,
+        xpBarX = 50,
         xpBarY = 50,
         xpBarWidth = -1,
         xpBarHeight = 0,
