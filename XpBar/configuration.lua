@@ -97,13 +97,30 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
 
-        if imgui.Checkbox("Enable Info Text", _configuration.xpEnableInfoText) then
-            _configuration.xpEnableInfoText = not _configuration.xpEnableInfoText
+        if imgui.Checkbox("Transparent Background", _configuration.xpTransparent) then
+            _configuration.xpTransparent = not _configuration.xpTransparent
             this.changed = true
         end
 
-        if imgui.Checkbox("Transparent Background", _configuration.xpTransparent) then
-            _configuration.xpTransparent = not _configuration.xpTransparent
+        if imgui.Checkbox("Enable Info", _configuration.xpEnableInfo) then
+            _configuration.xpEnableInfo = not _configuration.xpEnableInfo
+            this.changed = true
+        end
+        if imgui.Checkbox("Enable Info Level", _configuration.xpEnableInfoLevel) then
+            _configuration.xpEnableInfoLevel = not _configuration.xpEnableInfoLevel
+            this.changed = true
+        end
+        if imgui.Checkbox("Enable Info Total Exp", _configuration.xpEnableInfoTotal) then
+            _configuration.xpEnableInfoTotal = not _configuration.xpEnableInfoTotal
+            this.changed = true
+        end
+        if imgui.Checkbox("Enable Info To Next Level Exp", _configuration.xpEnableInfoTNL) then
+            _configuration.xpEnableInfoTNL = not _configuration.xpEnableInfoTNL
+            this.changed = true
+        end
+
+        if imgui.Checkbox("XP bar no overlay", _configuration.xpBarNoOverlay) then
+            _configuration.xpBarNoOverlay = not _configuration.xpBarNoOverlay
             this.changed = true
         end
 
@@ -136,11 +153,6 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
         imgui.PopItemWidth()
-
-        if imgui.Checkbox("XP bar no overlay", _configuration.xpBarNoOverlay) then
-            _configuration.xpBarNoOverlay = not _configuration.xpBarNoOverlay
-            this.changed = true
-        end
     end
 
     this.Update = function()
