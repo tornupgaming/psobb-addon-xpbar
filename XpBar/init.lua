@@ -19,14 +19,17 @@ if optionsLoaded then
     options.xpNoTitleBar = options.xpNoTitleBar or ""
     options.xpNoResize = options.xpNoResize or ""
     options.xpNoMove = options.xpNoMove or ""
-    options.xpEnableInfoText = options.xpEnableInfoText == nil and true or options.xpEnableInfoText
     options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
+    options.xpEnableInfo = options.xpEnableInfo == nil and true or options.xpEnableInfo
+    options.xpEnableInfoLevel = options.xpEnableInfoLevel == nil and true or options.xpEnableInfoLevel
+    options.xpEnableInfoTotal = options.xpEnableInfoTotal == nil and true or options.xpEnableInfoTotal
+    options.xpEnableInfoTNL = options.xpEnableInfoTNL == nil and true or options.xpEnableInfoTNL
+    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
     options.xpBarColor = options.xpBarColor or 0xFFE6B300
     options.xpBarX = options.xpBarX or 50
     options.xpBarY = options.xpBarY or 50
     options.xpBarWidth = options.xpBarWidth or -1
     options.xpBarHeight = options.xpBarHeight or 0
-    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
 else
     options = 
     {
@@ -36,14 +39,17 @@ else
         xpNoTitleBar = "",
         xpNoResize = "",
         xpNoMove = "",
-        xpEnableInfoText = true,
         xpTransparent = false,
+        xpEnableInfo = true,
+        xpEnableInfoLevel = true,
+        xpEnableInfoTotal = true,
+        xpEnableInfoTNL = true,
+        xpBarNoOverlay = false,
         xpBarColor = 0xFFE6B300,
         xpBarX = 50,
         xpBarY = 50,
         xpBarWidth = -1,
         xpBarHeight = 0,
-        xpBarNoOverlay = false,
     }
 end
 
@@ -60,14 +66,17 @@ local function SaveOptions(options)
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
-        io.write(string.format("    xpEnableInfoText = %s,\n", tostring(options.xpEnableInfoText)))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
+        io.write(string.format("    xpEnableInfo = %s,\n", tostring(options.xpEnableInfo)))
+        io.write(string.format("    xpEnableInfoLevel = %s,\n", tostring(options.xpEnableInfoLevel)))
+        io.write(string.format("    xpEnableInfoTotal = %s,\n", tostring(options.xpEnableInfoTotal)))
+        io.write(string.format("    xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
+        io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
         io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
         io.write(string.format("    xpBarX = %f,\n", options.xpBarX))
         io.write(string.format("    xpBarY = %f,\n", options.xpBarY))
         io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
         io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
-        io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
         io.write("}\n")
 
         io.close(file)
@@ -111,11 +120,11 @@ local DrawStuff = function()
 
     -- Do the thing only if the pointer is not null
     if myAddress == 0 then
-        if options.xpEnableInfoText then
+        if options.xpEnableInfo then
             imgui.Text("Player data not found")
         end
     elseif pltData == 0 then
-        if options.xpEnableInfoText then
+        if options.xpEnableInfo then
             imgui.Text("PLT data not found")
         end
     else
@@ -144,9 +153,14 @@ local DrawStuff = function()
         end
 
         imguiProgressBar(levelProgress, options.xpBarColor)
-        if options.xpEnableInfoText then
+
+        if options.xpEnableInfoLevel then
             imgui.Text(string.format("Lv    : %i", myLevel + 1))
+        end
+        if options.xpEnableInfoTotal then
             imgui.Text(string.format("Total : %i", myExp))
+        end
+        if options.xpEnableInfoTNL then
             imgui.Text(string.format("TNL   : %i", currLevelExp))
         end
     end
