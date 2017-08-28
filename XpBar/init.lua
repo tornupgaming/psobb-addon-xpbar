@@ -137,6 +137,7 @@ local DrawStuff = function()
 
         local thisLevelExp = myExp - thisMaxLevelExp
         local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
+        local currLevelExp = nextMaxLevelexp - myExp
         local levelProgress = 1
         if nextLevelexp ~= 0 then
             levelProgress = thisLevelExp / nextLevelexp
@@ -144,7 +145,9 @@ local DrawStuff = function()
 
         imguiProgressBar(levelProgress, options.xpBarColor)
         if options.xpEnableInfoText then
-            imgui.Text(string.format("Lv %i %i/%i", myLevel + 1, thisLevelExp, nextLevelexp))
+            imgui.Text(string.format("Lv    : %i", myLevel + 1))
+            imgui.Text(string.format("Total : %i", myExp))
+            imgui.Text(string.format("TNL   : %i", currLevelExp))
         end
     end
 end
