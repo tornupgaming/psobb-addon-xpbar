@@ -11,31 +11,83 @@ local _PlayerArray = 0x00A94254
 local _PlayerMyIndex = 0x00A9C4F4
 local _PLTPointer = 0x00A94878
 
+-- Helpers in solylib
+local function _getMenuState()
+    local offsets = {
+        0x00A98478,
+        0x00000010,
+        0x0000001E,
+    }
+    local address = 0
+    local value = -1
+    local bad_read = false
+    for k, v in pairs(offsets) do
+        if address ~= -1 then
+            address = pso.read_u32(address + v)
+            if address == 0 then
+                address = -1
+            end
+        end
+    end
+    if address ~= -1 then
+        value = bit.band(address, 0xFFFF)
+    end
+    return value
+end
+local function IsMenuOpen()
+    local menuOpen = 0x43
+    local menuState = _getMenuState()
+    return menuState == menuOpen
+end
+local function IsSymbolChatOpen()
+    local wordSelectOpen = 0x40
+    local menuState = _getMenuState()
+    return menuState == wordSelectOpen
+end
+local function IsMenuUnavailable()
+    local menuState = _getMenuState()
+    return menuState == -1
+end
+local function NotNilOrDefault(value, default)
+    if value == nil then
+        return default
+    else
+        return value
+    end
+end
+-- End of helpers in solylib
+
 if optionsLoaded then
     -- If options loaded, make sure we have all those we need
-    options.configurationEnableWindow = options.configurationEnableWindow == nil and true or options.configurationEnableWindow
-    options.enable = options.enable == nil and true or options.enable
-    options.xpEnableWindow = options.xpEnableWindow == nil and true or options.xpEnableWindow
-    options.xpNoTitleBar = options.xpNoTitleBar or ""
-    options.xpNoResize = options.xpNoResize or ""
-    options.xpNoMove = options.xpNoMove or ""
-    options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
-    options.xpEnableInfo = options.xpEnableInfo == nil and true or options.xpEnableInfo
-    options.xpEnableInfoLevel = options.xpEnableInfoLevel == nil and true or options.xpEnableInfoLevel
-    options.xpEnableInfoTotal = options.xpEnableInfoTotal == nil and true or options.xpEnableInfoTotal
-    options.xpEnableInfoTNL = options.xpEnableInfoTNL == nil and true or options.xpEnableInfoTNL
-    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
-    options.xpBarColor = options.xpBarColor or 0xFFE6B300
-    options.xpBarX = options.xpBarX or 50
-    options.xpBarY = options.xpBarY or 50
-    options.xpBarWidth = options.xpBarWidth or -1
-    options.xpBarHeight = options.xpBarHeight or 0
+    options.configurationEnableWindow = NotNilOrDefault(options.configurationEnableWindow, true)
+    options.enable                    = NotNilOrDefault(options.enable, true)
+    options.xpEnableWindow            = NotNilOrDefault(options.xpEnableWindow, true)
+    options.xpHideWhenMenu            = NotNilOrDefault(options.xpHideWhenMenu, true)
+    options.xpHideWhenSymbolChat      = NotNilOrDefault(options.xpHideWhenSymbolChat, true)
+    options.xpHideWhenMenuUnavailable = NotNilOrDefault(options.xpHideWhenMenuUnavailable, true)
+    options.xpNoTitleBar              = NotNilOrDefault(options.xpNoTitleBar, "")
+    options.xpNoResize                = NotNilOrDefault(options.xpNoResize, "")
+    options.xpNoMove                  = NotNilOrDefault(options.xpNoMove, "")
+    options.xpTransparent             = NotNilOrDefault(options.xpTransparent, false)
+    options.xpEnableInfo              = NotNilOrDefault(options.xpEnableInfo, true)
+    options.xpEnableInfoLevel         = NotNilOrDefault(options.xpEnableInfoLevel, true)
+    options.xpEnableInfoTotal         = NotNilOrDefault(options.xpEnableInfoTotal, true)
+    options.xpEnableInfoTNL           = NotNilOrDefault(options.xpEnableInfoTNL, true)
+    options.xpBarNoOverlay            = NotNilOrDefault(options.xpBarNoOverlay, false)
+    options.xpBarColor                = NotNilOrDefault(options.xpBarColor, 0xFFE6B300)
+    options.xpBarX                    = NotNilOrDefault(options.xpBarX, 50)
+    options.xpBarY                    = NotNilOrDefault(options.xpBarY, 50)
+    options.xpBarWidth                = NotNilOrDefault(options.xpBarWidth, -1)
+    options.xpBarHeight               = NotNilOrDefault(options.xpBarHeight, 0)
 else
-    options = 
+    options =
     {
         configurationEnableWindow = true,
         enable = true,
         xpEnableWindow = true,
+        xpHideWhenMenu = false,
+        xpHideWhenSymbolChat = false,
+        xpHideWhenMenuUnavailable = false,
         xpNoTitleBar = "",
         xpNoResize = "",
         xpNoMove = "",
@@ -63,6 +115,9 @@ local function SaveOptions(options)
         io.write(string.format("    enable = %s,\n", tostring(options.enable)))
         io.write("\n")
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
+        io.write(string.format("    xpHideWhenMenu = %s,\n", tostring(options.xpHideWhenMenu)))
+        io.write(string.format("    xpHideWhenSymbolChat = %s,\n", tostring(options.xpHideWhenSymbolChat)))
+        io.write(string.format("    xpHideWhenMenuUnavailable = %s,\n", tostring(options.xpHideWhenMenuUnavailable)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
@@ -192,7 +247,11 @@ local function present()
         imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
     end
 
-    if options.xpEnableWindow then
+    if (options.xpEnableWindow)
+        and (options.xpHideWhenMenu == false or IsMenuOpen() == false)
+        and (options.xpHideWhenSymbolChat == false or IsSymbolChatOpen() == false)
+        and (options.xpHideWhenMenuUnavailable == false or IsMenuUnavailable() == false)
+    then
         if changedOptions == true then
             changedOptions = false
             imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");
