@@ -119,18 +119,18 @@ local DrawStuff = function()
     local pltData = pso.read_u32(_PLTPointer)
 
     -- Do the thing only if the pointer is not null
-    if myAddress == 0 then
+    local levelProgress, myLevel, myExp, currLevelExp
+    if myAddress == 0 or pltData == 0 then
         if options.xpEnableInfo then
-            imgui.Text("Player data not found")
-        end
-    elseif pltData == 0 then
-        if options.xpEnableInfo then
-            imgui.Text("PLT data not found")
+            levelProgress = 0
+            myLevel = 0
+            myExp = 0
+            currLevelExp = 50
         end
     else
         local myClass = pso.read_u8(myAddress + 0x961)
-        local myLevel = pso.read_u32(myAddress + 0xE44)
-        local myExp = pso.read_u32(myAddress + 0xE48)
+        myLevel = pso.read_u32(myAddress + 0xE44)
+        myExp = pso.read_u32(myAddress + 0xE48)
 
         local pltLevels = pso.read_u32(pltData)
         local pltClass = pso.read_u32(pltLevels + 4 * myClass)
@@ -146,23 +146,23 @@ local DrawStuff = function()
 
         local thisLevelExp = myExp - thisMaxLevelExp
         local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
-        local currLevelExp = nextMaxLevelexp - myExp
-        local levelProgress = 1
+        currLevelExp = nextMaxLevelexp - myExp
+        levelProgress = 1
         if nextLevelexp ~= 0 then
             levelProgress = thisLevelExp / nextLevelexp
         end
+    end
 
-        imguiProgressBar(levelProgress, options.xpBarColor)
+    imguiProgressBar(levelProgress, options.xpBarColor)
 
-        if options.xpEnableInfoLevel then
-            imgui.Text(string.format("Lv    : %i", myLevel + 1))
-        end
-        if options.xpEnableInfoTotal then
-            imgui.Text(string.format("Total : %i", myExp))
-        end
-        if options.xpEnableInfoTNL then
-            imgui.Text(string.format("TNL   : %i", currLevelExp))
-        end
+    if options.xpEnableInfoLevel then
+        imgui.Text(string.format("Lv    : %i", myLevel + 1))
+    end
+    if options.xpEnableInfoTotal then
+        imgui.Text(string.format("Total : %i", myExp))
+    end
+    if options.xpEnableInfoTNL then
+        imgui.Text(string.format("TNL   : %i", currLevelExp))
     end
 end
 
