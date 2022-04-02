@@ -84,6 +84,11 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
 
+        if imgui.Checkbox("Show default instead of error", _configuration.xpShowDefaultNotError) then
+            _configuration.xpShowDefaultNotError = not _configuration.xpShowDefaultNotError
+            this.changed = true
+        end
+
         if imgui.Checkbox("No title bar", _configuration.xpNoTitleBar == "NoTitleBar") then
             if _configuration.xpNoTitleBar == "NoTitleBar" then
                 _configuration.xpNoTitleBar = ""

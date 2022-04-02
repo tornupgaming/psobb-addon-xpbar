@@ -65,6 +65,7 @@ if optionsLoaded then
     options.xpHideWhenMenu            = NotNilOrDefault(options.xpHideWhenMenu, true)
     options.xpHideWhenSymbolChat      = NotNilOrDefault(options.xpHideWhenSymbolChat, true)
     options.xpHideWhenMenuUnavailable = NotNilOrDefault(options.xpHideWhenMenuUnavailable, true)
+    options.xpShowDefaultNotError     = NotNilOrDefault(options.xpShowDefaultNotError, false)
     options.xpNoTitleBar              = NotNilOrDefault(options.xpNoTitleBar, "")
     options.xpNoResize                = NotNilOrDefault(options.xpNoResize, "")
     options.xpNoMove                  = NotNilOrDefault(options.xpNoMove, "")
@@ -88,6 +89,7 @@ else
         xpHideWhenMenu = false,
         xpHideWhenSymbolChat = false,
         xpHideWhenMenuUnavailable = false,
+        xpShowDefaultNotError = false,
         xpNoTitleBar = "",
         xpNoResize = "",
         xpNoMove = "",
@@ -118,6 +120,7 @@ local function SaveOptions(options)
         io.write(string.format("    xpHideWhenMenu = %s,\n", tostring(options.xpHideWhenMenu)))
         io.write(string.format("    xpHideWhenSymbolChat = %s,\n", tostring(options.xpHideWhenSymbolChat)))
         io.write(string.format("    xpHideWhenMenuUnavailable = %s,\n", tostring(options.xpHideWhenMenuUnavailable)))
+        io.write(string.format("    xpShowDefaultNotError = %s,\n", tostring(options.xpShowDefaultNotError)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
@@ -174,6 +177,17 @@ local DrawStuff = function()
     local pltData = pso.read_u32(_PLTPointer)
 
     -- Do the thing only if the pointer is not null
+    if (options.xpShowDefaultNotError == false) then
+        if options.xpEnableInfo then
+            if myAddress == 0 then
+                imgui.Text("Player data not found")
+                return
+            elseif pltData == 0 then
+                imgui.Text("PLT data not found")
+                return
+            end
+        end
+    end
     local levelProgress, myLevel, myExp, currLevelExp
     if myAddress == 0 or pltData == 0 then
         if options.xpEnableInfo then
