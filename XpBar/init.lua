@@ -218,7 +218,7 @@ local DrawStuff = function()
         currLevelExp = nextMaxLevelexp - myExp
         levelProgress = 1
         if nextLevelexp ~= 0 then
-            levelProgress = thisLevelExp / nextLevelexp
+            levelProgress = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
         end
     end
 
