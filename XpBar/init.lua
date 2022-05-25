@@ -171,6 +171,26 @@ local imguiProgressBar = function(progress, color)
     imgui.PopStyleColor()
 end
 
+
+-- Validate and render  the bar given the pre-determined values
+local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, progressAsFraction)
+
+    imguiProgressBar(progressAsFraction, options.xpBarColor)
+
+    if options.xpEnableInfoLevel then
+        imgui.Text(string.format("Lv    : %i", currentLevel + 1))
+    end
+
+    if options.xpEnableInfoTotal then
+        imgui.Text(string.format("Total : %i", currentExp))
+    end
+
+    if options.xpEnableInfoTNL then
+        imgui.Text(string.format("TNL   : %i", expToNextLevel))
+    end
+end
+
+
 local DrawStuff = function()
     local myIndex = pso.read_u32(_PlayerMyIndex)
     local myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
@@ -222,17 +242,7 @@ local DrawStuff = function()
         end
     end
 
-    imguiProgressBar(levelProgress, options.xpBarColor)
-
-    if options.xpEnableInfoLevel then
-        imgui.Text(string.format("Lv    : %i", myLevel + 1))
-    end
-    if options.xpEnableInfoTotal then
-        imgui.Text(string.format("Total : %i", myExp))
-    end
-    if options.xpEnableInfoTNL then
-        imgui.Text(string.format("TNL   : %i", currLevelExp))
-    end
+    renderBarAndText(myLevel, myExp, currLevelExp, levelProgress)
 end
 
 -- Drawing
