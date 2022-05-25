@@ -11,36 +11,88 @@ local _PlayerArray = 0x00A94254
 local _PlayerMyIndex = 0x00A9C4F4
 local _PLTPointer = 0x00A94878
 
+-- Helpers in solylib
+local function _getMenuState()
+    local offsets = {
+        0x00A98478,
+        0x00000010,
+        0x0000001E,
+    }
+    local address = 0
+    local value = -1
+    local bad_read = false
+    for k, v in pairs(offsets) do
+        if address ~= -1 then
+            address = pso.read_u32(address + v)
+            if address == 0 then
+                address = -1
+            end
+        end
+    end
+    if address ~= -1 then
+        value = bit.band(address, 0xFFFF)
+    end
+    return value
+end
+local function IsMenuOpen()
+    local menuOpen = 0x43
+    local menuState = _getMenuState()
+    return menuState == menuOpen
+end
+local function IsSymbolChatOpen()
+    local wordSelectOpen = 0x40
+    local menuState = _getMenuState()
+    return menuState == wordSelectOpen
+end
+local function IsMenuUnavailable()
+    local menuState = _getMenuState()
+    return menuState == -1
+end
+local function NotNilOrDefault(value, default)
+    if value == nil then
+        return default
+    else
+        return value
+    end
+end
+-- End of helpers in solylib
+
 if optionsLoaded then
     -- If options loaded, make sure we have all those we need
-    options.configurationEnableWindow = options.configurationEnableWindow == nil and true or options.configurationEnableWindow
-    options.enable = options.enable == nil and true or options.enable
-    options.xpEnableWindow = options.xpEnableWindow == nil and true or options.xpEnableWindow
-    options.xpNoTitleBar = options.xpNoTitleBar or ""
-    options.xpNoResize = options.xpNoResize or ""
-    options.xpNoMove = options.xpNoMove or ""
-    options.xpTransparent = options.xpTransparent == nil and true or options.xpTransparent
-    options.xpEnableInfo = options.xpEnableInfo == nil and true or options.xpEnableInfo
-    options.xpEnableInfoLevel = options.xpEnableInfoLevel == nil and true or options.xpEnableInfoLevel
-    options.xpEnableInfoTotal = options.xpEnableInfoTotal == nil and true or options.xpEnableInfoTotal
-    options.xpEnableInfoTNL = options.xpEnableInfoTNL == nil and true or options.xpEnableInfoTNL
-    options.xpBarNoOverlay = options.xpBarNoOverlay == nil and true or options.xpBarNoOverlay
-    options.xpBarColor = options.xpBarColor or 0xFFE6B300
-    options.xpBarX = options.xpBarX or 50
-    options.xpBarY = options.xpBarY or 50
-    options.xpBarWidth = options.xpBarWidth or -1
-    options.xpBarHeight = options.xpBarHeight or 0
+    options.configurationEnableWindow = NotNilOrDefault(options.configurationEnableWindow, true)
+    options.enable                    = NotNilOrDefault(options.enable, true)
+    options.xpEnableWindow            = NotNilOrDefault(options.xpEnableWindow, true)
+    options.xpHideWhenMenu            = NotNilOrDefault(options.xpHideWhenMenu, true)
+    options.xpHideWhenSymbolChat      = NotNilOrDefault(options.xpHideWhenSymbolChat, true)
+    options.xpHideWhenMenuUnavailable = NotNilOrDefault(options.xpHideWhenMenuUnavailable, true)
+    options.xpShowDefaultNotError     = NotNilOrDefault(options.xpShowDefaultNotError, false)
+    options.xpNoTitleBar              = NotNilOrDefault(options.xpNoTitleBar, "")
+    options.xpNoResize                = NotNilOrDefault(options.xpNoResize, "")
+    options.xpNoMove                  = NotNilOrDefault(options.xpNoMove, "")
+    options.xpTransparent             = NotNilOrDefault(options.xpTransparent, false)
+    options.xpEnableInfoLevel         = NotNilOrDefault(options.xpEnableInfoLevel, true)
+    options.xpEnableInfoTotal         = NotNilOrDefault(options.xpEnableInfoTotal, true)
+    options.xpEnableInfoTNL           = NotNilOrDefault(options.xpEnableInfoTNL, true)
+    options.xpBarNoOverlay            = NotNilOrDefault(options.xpBarNoOverlay, false)
+    options.xpBarColor                = NotNilOrDefault(options.xpBarColor, 0xFFE6B300)
+    options.xpBarX                    = NotNilOrDefault(options.xpBarX, 50)
+    options.xpBarY                    = NotNilOrDefault(options.xpBarY, 50)
+    options.xpBarWidth                = NotNilOrDefault(options.xpBarWidth, -1)
+    options.xpBarHeight               = NotNilOrDefault(options.xpBarHeight, 0)
 else
-    options = 
+    options =
     {
         configurationEnableWindow = true,
         enable = true,
         xpEnableWindow = true,
+        xpHideWhenMenu = false,
+        xpHideWhenSymbolChat = false,
+        xpHideWhenMenuUnavailable = false,
+        xpShowDefaultNotError = false,
         xpNoTitleBar = "",
         xpNoResize = "",
         xpNoMove = "",
         xpTransparent = false,
-        xpEnableInfo = true,
         xpEnableInfoLevel = true,
         xpEnableInfoTotal = true,
         xpEnableInfoTNL = true,
@@ -63,11 +115,14 @@ local function SaveOptions(options)
         io.write(string.format("    enable = %s,\n", tostring(options.enable)))
         io.write("\n")
         io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
+        io.write(string.format("    xpHideWhenMenu = %s,\n", tostring(options.xpHideWhenMenu)))
+        io.write(string.format("    xpHideWhenSymbolChat = %s,\n", tostring(options.xpHideWhenSymbolChat)))
+        io.write(string.format("    xpHideWhenMenuUnavailable = %s,\n", tostring(options.xpHideWhenMenuUnavailable)))
+        io.write(string.format("    xpShowDefaultNotError = %s,\n", tostring(options.xpShowDefaultNotError)))
         io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
-        io.write(string.format("    xpEnableInfo = %s,\n", tostring(options.xpEnableInfo)))
         io.write(string.format("    xpEnableInfoLevel = %s,\n", tostring(options.xpEnableInfoLevel)))
         io.write(string.format("    xpEnableInfoTotal = %s,\n", tostring(options.xpEnableInfoTotal)))
         io.write(string.format("    xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
@@ -113,57 +168,76 @@ local imguiProgressBar = function(progress, color)
     imgui.PopStyleColor()
 end
 
+
+-- Validate and render  the bar given the pre-determined values
+local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, progressAsFraction)
+
+    imguiProgressBar(progressAsFraction, options.xpBarColor)
+
+    if options.xpEnableInfoLevel then
+        imgui.Text(string.format("Lv    : %i", currentLevel + 1))
+    end
+
+    if options.xpEnableInfoTotal then
+        imgui.Text(string.format("Total : %i", currentExp))
+    end
+
+    if options.xpEnableInfoTNL then
+        imgui.Text(string.format("TNL   : %i", expToNextLevel))
+    end
+end
+
+local renderError = function(errorMsg)
+    if (options.xpShowDefaultNotError == false) then
+        imgui.Text(errorMsg)
+    else
+        renderBarAndText(0, 0, 50, 0)
+    end
+end
+
+
 local DrawStuff = function()
-    local myIndex = pso.read_u32(_PlayerMyIndex)
-    local myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
+    local currentPlayerIndex = pso.read_u32(_PlayerMyIndex)
+    local characterMemAddress = pso.read_u32(_PlayerArray + 4 * currentPlayerIndex)
     local pltData = pso.read_u32(_PLTPointer)
 
-    -- Do the thing only if the pointer is not null
-    if myAddress == 0 then
-        if options.xpEnableInfo then
-            imgui.Text("Player data not found")
-        end
-    elseif pltData == 0 then
-        if options.xpEnableInfo then
-            imgui.Text("PLT data not found")
-        end
-    else
-        local myClass = pso.read_u8(myAddress + 0x961)
-        local myLevel = pso.read_u32(myAddress + 0xE44)
-        local myExp = pso.read_u32(myAddress + 0xE48)
-
-        local pltLevels = pso.read_u32(pltData)
-        local pltClass = pso.read_u32(pltLevels + 4 * myClass)
-
-        local thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * myLevel + 0x08)
-        local nextMaxLevelexp
-
-        if myLevel < 199 then
-            nextMaxLevelexp = pso.read_u32(pltClass + 0x0C * (myLevel + 1) + 0x08)
-        else
-            nextMaxLevelexp = thisMaxLevelExp
-        end
-
-        local thisLevelExp = myExp - thisMaxLevelExp
-        local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
-        local currLevelExp = nextMaxLevelexp - myExp
-        local levelProgress = 1
-        if nextLevelexp ~= 0 then
-            levelProgress = thisLevelExp / nextLevelexp
-        end
-
-        imguiProgressBar(levelProgress, options.xpBarColor)
-
-        if options.xpEnableInfoLevel then
-            imgui.Text(string.format("Lv    : %i", myLevel + 1))
-        end
-        if options.xpEnableInfoTotal then
-            imgui.Text(string.format("Total : %i", myExp))
-        end
-        if options.xpEnableInfoTNL then
-            imgui.Text(string.format("TNL   : %i", currLevelExp))
-        end
+    -- Check the player has selected a character
+    if characterMemAddress == 0 then 
+        renderError("Player data not found")
+        return
     end
+
+    -- Check that our player data is available
+    if pltData == 0 then 
+        renderError("PLT data not found")
+        return
+    end
+
+    local myClass = pso.read_u8(characterMemAddress + 0x961)
+    local charCurrentLevel = pso.read_u32(characterMemAddress + 0xE44)
+    local charTotalExp = pso.read_u32(characterMemAddress + 0xE48)
+
+    local pltLevels = pso.read_u32(pltData)
+    local pltClass = pso.read_u32(pltLevels + 4 * myClass)
+
+    local thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * charCurrentLevel + 0x08)
+    local nextMaxLevelexp
+
+    if charCurrentLevel < 199 then
+        nextMaxLevelexp = pso.read_u32(pltClass + 0x0C * (charCurrentLevel + 1) + 0x08)
+    else
+        nextMaxLevelexp = thisMaxLevelExp
+    end
+
+    local thisLevelExp = charTotalExp - thisMaxLevelExp
+    local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
+    local expToNextLevel = nextMaxLevelexp - charTotalExp
+    local progressAsFraction = 1
+    if nextLevelexp ~= 0 then
+        progressAsFraction = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
+    end
+
+    renderBarAndText(charCurrentLevel, charTotalExp, expToNextLevel, progressAsFraction)
 end
 
 -- Drawing
@@ -192,7 +266,11 @@ local function present()
         imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
     end
 
-    if options.xpEnableWindow then
+    if (options.xpEnableWindow)
+        and (options.xpHideWhenMenu == false or IsMenuOpen() == false)
+        and (options.xpHideWhenSymbolChat == false or IsSymbolChatOpen() == false)
+        and (options.xpHideWhenMenuUnavailable == false or IsMenuUnavailable() == false)
+    then
         if changedOptions == true then
             changedOptions = false
             imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");

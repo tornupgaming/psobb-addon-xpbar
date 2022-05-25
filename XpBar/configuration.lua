@@ -20,7 +20,7 @@ local function PresentColorEditor(label, col, col_d)
         if n ~= 1 then
             imgui.SameLine(0, 5)
         end
-        
+
         changedDragInt, i[n] = imgui.DragInt(ids[n], i[n], 1.0, 0, 255, fmt[n])
     end
     imgui.PopItemWidth()
@@ -53,7 +53,7 @@ local function PresentColorEditor(label, col, col_d)
 end
 
 local function ConfigurationWindow(configuration)
-    local this = 
+    local this =
     {
         title = "Experience Bar - Configuration",
         fontScale = 1.0,
@@ -65,12 +65,30 @@ local function ConfigurationWindow(configuration)
 
     local _showWindowSettings = function()
         local success
-        
+
         if imgui.Checkbox("Enable", _configuration.xpEnableWindow) then
             _configuration.xpEnableWindow = not _configuration.xpEnableWindow
             this.changed = true
         end
-        
+
+        if imgui.Checkbox("Hide when menus are open", _configuration.xpHideWhenMenu) then
+            _configuration.xpHideWhenMenu = not _configuration.xpHideWhenMenu
+            this.changed = true
+        end
+        if imgui.Checkbox("Hide when symbol chat/word select is open", _configuration.xpHideWhenSymbolChat) then
+            _configuration.xpHideWhenSymbolChat = not _configuration.xpHideWhenSymbolChat
+            this.changed = true
+        end
+        if imgui.Checkbox("Hide when the menu is unavailable", _configuration.xpHideWhenMenuUnavailable) then
+            _configuration.xpHideWhenMenuUnavailable = not _configuration.xpHideWhenMenuUnavailable
+            this.changed = true
+        end
+
+        if imgui.Checkbox("Show default instead of error", _configuration.xpShowDefaultNotError) then
+            _configuration.xpShowDefaultNotError = not _configuration.xpShowDefaultNotError
+            this.changed = true
+        end
+
         if imgui.Checkbox("No title bar", _configuration.xpNoTitleBar == "NoTitleBar") then
             if _configuration.xpNoTitleBar == "NoTitleBar" then
                 _configuration.xpNoTitleBar = ""
@@ -102,10 +120,6 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
 
-        if imgui.Checkbox("Enable Info", _configuration.xpEnableInfo) then
-            _configuration.xpEnableInfo = not _configuration.xpEnableInfo
-            this.changed = true
-        end
         if imgui.Checkbox("Enable Info Level", _configuration.xpEnableInfoLevel) then
             _configuration.xpEnableInfoLevel = not _configuration.xpEnableInfoLevel
             this.changed = true
@@ -135,7 +149,7 @@ local function ConfigurationWindow(configuration)
         if changedDragInt then
             this.changed = true
         end
-        
+
         imgui.SameLine(0, 5)
         changedDragInt, _configuration.xpBarY = imgui.DragInt("##Y", _configuration.xpBarY, 1.0, 0, 0, "Y: %4.0f")
         if changedDragInt then
@@ -174,7 +188,7 @@ local function ConfigurationWindow(configuration)
     return this
 end
 
-return 
+return
 {
     ConfigurationWindow = ConfigurationWindow,
 }
