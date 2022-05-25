@@ -120,10 +120,6 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
 
-        if imgui.Checkbox("Enable Info", _configuration.xpEnableInfo) then
-            _configuration.xpEnableInfo = not _configuration.xpEnableInfo
-            this.changed = true
-        end
         if imgui.Checkbox("Enable Info Level", _configuration.xpEnableInfoLevel) then
             _configuration.xpEnableInfoLevel = not _configuration.xpEnableInfoLevel
             this.changed = true

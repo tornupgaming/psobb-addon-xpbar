@@ -70,7 +70,6 @@ if optionsLoaded then
     options.xpNoResize                = NotNilOrDefault(options.xpNoResize, "")
     options.xpNoMove                  = NotNilOrDefault(options.xpNoMove, "")
     options.xpTransparent             = NotNilOrDefault(options.xpTransparent, false)
-    options.xpEnableInfo              = NotNilOrDefault(options.xpEnableInfo, true)
     options.xpEnableInfoLevel         = NotNilOrDefault(options.xpEnableInfoLevel, true)
     options.xpEnableInfoTotal         = NotNilOrDefault(options.xpEnableInfoTotal, true)
     options.xpEnableInfoTNL           = NotNilOrDefault(options.xpEnableInfoTNL, true)
@@ -94,7 +93,6 @@ else
         xpNoResize = "",
         xpNoMove = "",
         xpTransparent = false,
-        xpEnableInfo = true,
         xpEnableInfoLevel = true,
         xpEnableInfoTotal = true,
         xpEnableInfoTNL = true,
@@ -125,7 +123,6 @@ local function SaveOptions(options)
         io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
         io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
         io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
-        io.write(string.format("    xpEnableInfo = %s,\n", tostring(options.xpEnableInfo)))
         io.write(string.format("    xpEnableInfoLevel = %s,\n", tostring(options.xpEnableInfoLevel)))
         io.write(string.format("    xpEnableInfoTotal = %s,\n", tostring(options.xpEnableInfoTotal)))
         io.write(string.format("    xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
@@ -190,59 +187,57 @@ local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, prog
     end
 end
 
+local renderError = function(errorMsg)
+    if (options.xpShowDefaultNotError == false) then
+        imgui.Text(errorMsg)
+    else
+        renderBarAndText(0, 0, 50, 0)
+    end
+end
+
 
 local DrawStuff = function()
-    local myIndex = pso.read_u32(_PlayerMyIndex)
-    local myAddress = pso.read_u32(_PlayerArray + 4 * myIndex)
+    local currentPlayerIndex = pso.read_u32(_PlayerMyIndex)
+    local characterMemAddress = pso.read_u32(_PlayerArray + 4 * currentPlayerIndex)
     local pltData = pso.read_u32(_PLTPointer)
 
-    -- Do the thing only if the pointer is not null
-    if (options.xpShowDefaultNotError == false) then
-        if options.xpEnableInfo then
-            if myAddress == 0 then
-                imgui.Text("Player data not found")
-                return
-            elseif pltData == 0 then
-                imgui.Text("PLT data not found")
-                return
-            end
-        end
+    -- Check the player has selected a character
+    if characterMemAddress == 0 then 
+        renderError("Player data not found")
+        return
     end
-    local levelProgress, myLevel, myExp, currLevelExp
-    if myAddress == 0 or pltData == 0 then
-        if options.xpEnableInfo then
-            levelProgress = 0
-            myLevel = 0
-            myExp = 0
-            currLevelExp = 50
-        end
+
+    -- Check that our player data is available
+    if pltData == 0 then 
+        renderError("PLT data not found")
+        return
+    end
+
+    local myClass = pso.read_u8(characterMemAddress + 0x961)
+    local charCurrentLevel = pso.read_u32(characterMemAddress + 0xE44)
+    local charTotalExp = pso.read_u32(characterMemAddress + 0xE48)
+
+    local pltLevels = pso.read_u32(pltData)
+    local pltClass = pso.read_u32(pltLevels + 4 * myClass)
+
+    local thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * charCurrentLevel + 0x08)
+    local nextMaxLevelexp
+
+    if charCurrentLevel < 199 then
+        nextMaxLevelexp = pso.read_u32(pltClass + 0x0C * (charCurrentLevel + 1) + 0x08)
     else
-        local myClass = pso.read_u8(myAddress + 0x961)
-        myLevel = pso.read_u32(myAddress + 0xE44)
-        myExp = pso.read_u32(myAddress + 0xE48)
-
-        local pltLevels = pso.read_u32(pltData)
-        local pltClass = pso.read_u32(pltLevels + 4 * myClass)
-
-        local thisMaxLevelExp = pso.read_u32(pltClass + 0x0C * myLevel + 0x08)
-        local nextMaxLevelexp
-
-        if myLevel < 199 then
-            nextMaxLevelexp = pso.read_u32(pltClass + 0x0C * (myLevel + 1) + 0x08)
-        else
-            nextMaxLevelexp = thisMaxLevelExp
-        end
-
-        local thisLevelExp = myExp - thisMaxLevelExp
-        local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
-        currLevelExp = nextMaxLevelexp - myExp
-        levelProgress = 1
-        if nextLevelexp ~= 0 then
-            levelProgress = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
-        end
+        nextMaxLevelexp = thisMaxLevelExp
     end
 
-    renderBarAndText(myLevel, myExp, currLevelExp, levelProgress)
+    local thisLevelExp = charTotalExp - thisMaxLevelExp
+    local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
+    local expToNextLevel = nextMaxLevelexp - charTotalExp
+    local progressAsFraction = 1
+    if nextLevelexp ~= 0 then
+        progressAsFraction = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
+    end
+
+    renderBarAndText(charCurrentLevel, charTotalExp, expToNextLevel, progressAsFraction)
 end
 
 -- Drawing
