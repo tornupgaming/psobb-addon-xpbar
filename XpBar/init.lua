@@ -57,28 +57,46 @@ local function NotNilOrDefault(value, default)
 end
 -- End of helpers in solylib
 
+-- Global variable to store stats for text window
+local StatsWindow = {
+    currentLevel = 0,
+    currentExp = 0,
+    expToNextLevel = 0
+}
+
 if optionsLoaded then
     -- If options loaded, make sure we have all those we need
-    options.configurationEnableWindow = NotNilOrDefault(options.configurationEnableWindow, true)
-    options.enable                    = NotNilOrDefault(options.enable, true)
-    options.xpEnableWindow            = NotNilOrDefault(options.xpEnableWindow, true)
-    options.xpHideWhenMenu            = NotNilOrDefault(options.xpHideWhenMenu, true)
-    options.xpHideWhenSymbolChat      = NotNilOrDefault(options.xpHideWhenSymbolChat, true)
-    options.xpHideWhenMenuUnavailable = NotNilOrDefault(options.xpHideWhenMenuUnavailable, true)
-    options.xpShowDefaultNotError     = NotNilOrDefault(options.xpShowDefaultNotError, false)
-    options.xpNoTitleBar              = NotNilOrDefault(options.xpNoTitleBar, "")
-    options.xpNoResize                = NotNilOrDefault(options.xpNoResize, "")
-    options.xpNoMove                  = NotNilOrDefault(options.xpNoMove, "")
-    options.xpTransparent             = NotNilOrDefault(options.xpTransparent, false)
-    options.xpEnableInfoLevel         = NotNilOrDefault(options.xpEnableInfoLevel, true)
-    options.xpEnableInfoTotal         = NotNilOrDefault(options.xpEnableInfoTotal, true)
-    options.xpEnableInfoTNL           = NotNilOrDefault(options.xpEnableInfoTNL, true)
-    options.xpBarNoOverlay            = NotNilOrDefault(options.xpBarNoOverlay, false)
-    options.xpBarColor                = NotNilOrDefault(options.xpBarColor, 0xFFE6B300)
-    options.xpBarX                    = NotNilOrDefault(options.xpBarX, 50)
-    options.xpBarY                    = NotNilOrDefault(options.xpBarY, 50)
-    options.xpBarWidth                = NotNilOrDefault(options.xpBarWidth, -1)
-    options.xpBarHeight               = NotNilOrDefault(options.xpBarHeight, 0)
+    options.configurationEnableWindow     = NotNilOrDefault(options.configurationEnableWindow, true)
+    options.enable                        = NotNilOrDefault(options.enable, true)
+    options.xpEnableWindow                = NotNilOrDefault(options.xpEnableWindow, true)
+    options.xpHideWhenMenu                = NotNilOrDefault(options.xpHideWhenMenu, true)
+    options.xpHideWhenSymbolChat          = NotNilOrDefault(options.xpHideWhenSymbolChat, true)
+    options.xpHideWhenMenuUnavailable     = NotNilOrDefault(options.xpHideWhenMenuUnavailable, true)
+    options.xpShowDefaultNotError         = NotNilOrDefault(options.xpShowDefaultNotError, false)
+    options.xpNoTitleBar                  = NotNilOrDefault(options.xpNoTitleBar, "")
+    options.xpNoResize                    = NotNilOrDefault(options.xpNoResize, "")
+    options.xpNoMove                      = NotNilOrDefault(options.xpNoMove, "")
+    options.xpTransparent                 = NotNilOrDefault(options.xpTransparent, false)
+    options.xpEnableInfoLevel             = NotNilOrDefault(options.xpEnableInfoLevel, true)
+    options.xpEnableInfoTotal             = NotNilOrDefault(options.xpEnableInfoTotal, true)
+    options.xpEnableInfoTNL               = NotNilOrDefault(options.xpEnableInfoTNL, true)
+    options.xpBarNoOverlay                = NotNilOrDefault(options.xpBarNoOverlay, false)
+    options.xpBarColor                    = NotNilOrDefault(options.xpBarColor, 0xFFE6B300)
+    options.xpBarX                        = NotNilOrDefault(options.xpBarX, 50)
+    options.xpBarY                        = NotNilOrDefault(options.xpBarY, 50)
+    options.xpBarWidth                    = NotNilOrDefault(options.xpBarWidth, -1)
+    options.xpBarHeight                   = NotNilOrDefault(options.xpBarHeight, 0)
+    options.xpVerticalBar                 = NotNilOrDefault(options.xpVerticalBar, false)
+    options.xpTextEnableWindow            = NotNilOrDefault(options.xpTextEnableWindow, false)
+    options.xpTextHideWhenMenu            = NotNilOrDefault(options.xpTextHideWhenMenu, true)
+    options.xpTextHideWhenSymbolChat      = NotNilOrDefault(options.xpTextHideWhenSymbolChat, true)
+    options.xpTextHideWhenMenuUnavailable = NotNilOrDefault(options.xpTextHideWhenMenuUnavailable, true)
+    options.xpTextNoTitleBar              = NotNilOrDefault(options.xpTextNoTitleBar, "")
+    options.xpTextNoResize                = NotNilOrDefault(options.xpTextNoResize, "")
+    options.xpTextNoMove                  = NotNilOrDefault(options.xpTextNoMove, "")
+    options.xpTextTransparent             = NotNilOrDefault(options.xpTextTransparent, false)
+    options.xpTextX                       = NotNilOrDefault(options.xpTextX, 200)
+    options.xpTextY                       = NotNilOrDefault(options.xpTextY, 50)
 else
     options =
     {
@@ -102,6 +120,17 @@ else
         xpBarY = 50,
         xpBarWidth = -1,
         xpBarHeight = 0,
+        xpVerticalBar = false,
+        xpTextEnableWindow = false,
+        xpTextHideWhenMenu = true,
+        xpTextHideWhenSymbolChat = true,
+        xpTextHideWhenMenuUnavailable = true,
+        xpTextNoTitleBar = "",
+        xpTextNoResize = "",
+        xpTextNoMove = "",
+        xpTextTransparent = false,
+        xpTextX = 200,
+        xpTextY = 50,
     }
 end
 
@@ -111,27 +140,38 @@ local function SaveOptions(options)
         io.output(file)
 
         io.write("return {\n")
-        io.write(string.format("    configurationEnableWindow = %s,\n", tostring(options.configurationEnableWindow)))
-        io.write(string.format("    enable = %s,\n", tostring(options.enable)))
+        io.write(string.format("configurationEnableWindow = %s,\n", tostring(options.configurationEnableWindow)))
+        io.write(string.format("enable = %s,\n", tostring(options.enable)))
         io.write("\n")
-        io.write(string.format("    xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
-        io.write(string.format("    xpHideWhenMenu = %s,\n", tostring(options.xpHideWhenMenu)))
-        io.write(string.format("    xpHideWhenSymbolChat = %s,\n", tostring(options.xpHideWhenSymbolChat)))
-        io.write(string.format("    xpHideWhenMenuUnavailable = %s,\n", tostring(options.xpHideWhenMenuUnavailable)))
-        io.write(string.format("    xpShowDefaultNotError = %s,\n", tostring(options.xpShowDefaultNotError)))
-        io.write(string.format("    xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
-        io.write(string.format("    xpNoResize = \"%s\",\n", options.xpNoResize))
-        io.write(string.format("    xpNoMove = \"%s\",\n", options.xpNoMove))
-        io.write(string.format("    xpTransparent = %s,\n", tostring(options.xpTransparent)))
-        io.write(string.format("    xpEnableInfoLevel = %s,\n", tostring(options.xpEnableInfoLevel)))
-        io.write(string.format("    xpEnableInfoTotal = %s,\n", tostring(options.xpEnableInfoTotal)))
-        io.write(string.format("    xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
-        io.write(string.format("    xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
-        io.write(string.format("    xpBarColor = 0x%08X,\n", options.xpBarColor))
-        io.write(string.format("    xpBarX = %f,\n", options.xpBarX))
-        io.write(string.format("    xpBarY = %f,\n", options.xpBarY))
-        io.write(string.format("    xpBarWidth = %f,\n", options.xpBarWidth))
-        io.write(string.format("    xpBarHeight = %f,\n", options.xpBarHeight))
+        io.write(string.format("xpEnableWindow = %s,\n", tostring(options.xpEnableWindow)))
+        io.write(string.format("xpHideWhenMenu = %s,\n", tostring(options.xpHideWhenMenu)))
+        io.write(string.format("xpHideWhenSymbolChat = %s,\n", tostring(options.xpHideWhenSymbolChat)))
+        io.write(string.format("xpHideWhenMenuUnavailable = %s,\n", tostring(options.xpHideWhenMenuUnavailable)))
+        io.write(string.format("xpShowDefaultNotError = %s,\n", tostring(options.xpShowDefaultNotError)))
+        io.write(string.format("xpNoTitleBar = \"%s\",\n", options.xpNoTitleBar))
+        io.write(string.format("xpNoResize = \"%s\",\n", options.xpNoResize))
+        io.write(string.format("xpNoMove = \"%s\",\n", options.xpNoMove))
+        io.write(string.format("xpTransparent = %s,\n", tostring(options.xpTransparent)))
+        io.write(string.format("xpEnableInfoLevel = %s,\n", tostring(options.xpEnableInfoLevel)))
+        io.write(string.format("xpEnableInfoTotal = %s,\n", tostring(options.xpEnableInfoTotal)))
+        io.write(string.format("xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
+        io.write(string.format("xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
+        io.write(string.format("xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("xpBarX = %f,\n", options.xpBarX))
+        io.write(string.format("xpBarY = %f,\n", options.xpBarY))
+        io.write(string.format("xpBarWidth = %f,\n", options.xpBarWidth))
+        io.write(string.format("xpBarHeight = %f,\n", options.xpBarHeight))
+        io.write(string.format("xpVerticalBar = %s,\n", tostring(options.xpVerticalBar)))
+        io.write(string.format("xpTextEnableWindow = %s,\n", tostring(options.xpTextEnableWindow)))
+        io.write(string.format("xpTextHideWhenMenu = %s,\n", tostring(options.xpTextHideWhenMenu)))
+        io.write(string.format("xpTextHideWhenSymbolChat = %s,\n", tostring(options.xpTextHideWhenSymbolChat)))
+        io.write(string.format("xpTextHideWhenMenuUnavailable = %s,\n", tostring(options.xpTextHideWhenMenuUnavailable)))
+        io.write(string.format("xpTextNoTitleBar = \"%s\",\n", options.xpTextNoTitleBar))
+        io.write(string.format("xpTextNoResize = \"%s\",\n", options.xpTextNoResize))
+        io.write(string.format("xpTextNoMove = \"%s\",\n", options.xpTextNoMove))
+        io.write(string.format("xpTextTransparent = %s,\n", tostring(options.xpTextTransparent)))
+        io.write(string.format("xpTextX = %f,\n", options.xpTextX))
+        io.write(string.format("xpTextY = %f,\n", options.xpTextY))
         io.write("}\n")
 
         io.close(file)
@@ -162,18 +202,82 @@ local imguiProgressBar = function(progress, color)
         overlay = ""
     end
 
-    c = GetColorAsFloats(color)
-    imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
-    imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
-    imgui.PopStyleColor()
+    local c = GetColorAsFloats(color)
+
+    if options.xpVerticalBar then
+        -- For vertical mode, maintain the same parameter meaning
+        -- Width = horizontal size, Height = vertical size
+        local barWidth, barHeight
+
+        -- Use width parameter for horizontal dimension
+        if options.xpBarWidth > 0 then
+            barWidth = options.xpBarWidth
+        else
+            barWidth = 20 -- Default width for vertical bar
+        end
+
+        -- Use height parameter for vertical dimension
+        if options.xpBarHeight > 0 then
+            barHeight = options.xpBarHeight
+        else
+            barHeight = 100 -- Default height for vertical bar
+        end
+
+        -- Set a fixed size for the vertical bar area
+        imgui.BeginChild("VertBar", barWidth, barHeight, false)
+
+        -- Calculate how many segments to draw (more segments = smoother appearance)
+        local segments = 20
+        local segmentHeight = barHeight / segments
+
+        -- Draw each segment as a horizontal progress bar
+        for i = 0, segments - 1 do
+            local segmentY = barHeight - ((i + 1) * segmentHeight) -- Position from bottom
+            imgui.SetCursorPos(0, segmentY)
+
+            local segmentProgress = 0
+            if (i / segments) < progress then
+                segmentProgress = 1.0 -- Fill completely
+            end
+
+            -- Draw segment
+            imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
+            imgui.ProgressBar(segmentProgress, barWidth, segmentHeight, "")
+            imgui.PopStyleColor()
+        end
+
+        -- Show percentage sideways if needed
+        if not options.xpBarNoOverlay and overlay == nil then
+            local percentText = string.format("%d%%", math.floor(progress * 100))
+
+            -- Calculate position for vertical text
+            local charHeight = 14 -- Approximate height of each character
+            local totalTextHeight = #percentText * charHeight
+            local startY = (barHeight - totalTextHeight) / 2
+
+            -- Display each character vertically
+            for i = 1, #percentText do
+                local char = string.sub(percentText, i, i)
+                local charWidth = imgui.CalcTextSize(char)
+                local xPos = (barWidth - charWidth) / 2
+                local yPos = startY + ((i-1) * charHeight)
+
+                imgui.SetCursorPos(xPos, yPos)
+                imgui.Text(char)
+            end
+        end
+
+        imgui.EndChild()
+    else
+        -- Original horizontal progress bar
+        imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
+        imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
+        imgui.PopStyleColor()
+    end
 end
 
-
--- Validate and render  the bar given the pre-determined values
-local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, progressAsFraction)
-
-    imguiProgressBar(progressAsFraction, options.xpBarColor)
-
+-- Function to render stats text (used by both main window and separate text window)
+local function RenderStatsText(currentLevel, currentExp, expToNextLevel)
     if options.xpEnableInfoLevel then
         imgui.Text(string.format("Lv    : %i", currentLevel + 1))
     end
@@ -187,6 +291,31 @@ local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, prog
     end
 end
 
+-- Validate and render the bar given the pre-determined values
+local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, progressAsFraction)
+    if options.xpVerticalBar then
+        -- For vertical layout, put the bar on the left and text on the right
+        imguiProgressBar(progressAsFraction, options.xpBarColor)
+
+        -- Only show text in main window if not using separate text window
+        if not options.xpTextEnableWindow then
+            imgui.SameLine()
+
+            imgui.BeginGroup()
+            RenderStatsText(currentLevel, currentExp, expToNextLevel)
+            imgui.EndGroup()
+        end
+    else
+        -- Original horizontal layout
+        imguiProgressBar(progressAsFraction, options.xpBarColor)
+
+        -- Only show text in main window if not using separate text window
+        if not options.xpTextEnableWindow then
+            RenderStatsText(currentLevel, currentExp, expToNextLevel)
+        end
+    end
+end
+
 local renderError = function(errorMsg)
     if (options.xpShowDefaultNotError == false) then
         imgui.Text(errorMsg)
@@ -195,20 +324,19 @@ local renderError = function(errorMsg)
     end
 end
 
-
 local DrawStuff = function()
     local currentPlayerIndex = pso.read_u32(_PlayerMyIndex)
     local characterMemAddress = pso.read_u32(_PlayerArray + 4 * currentPlayerIndex)
     local pltData = pso.read_u32(_PLTPointer)
 
     -- Check the player has selected a character
-    if characterMemAddress == 0 then 
+    if characterMemAddress == 0 then
         renderError("Player data not found")
         return
     end
 
     -- Check that our player data is available
-    if pltData == 0 then 
+    if pltData == 0 then
         renderError("PLT data not found")
         return
     end
@@ -237,13 +365,18 @@ local DrawStuff = function()
         progressAsFraction = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
     end
 
+    -- Store the stats for the separate text window
+    StatsWindow.currentLevel = charCurrentLevel
+    StatsWindow.currentExp = charTotalExp
+    StatsWindow.expToNextLevel = expToNextLevel
+
     renderBarAndText(charCurrentLevel, charTotalExp, expToNextLevel, progressAsFraction)
 end
 
 -- Drawing
 local function present()
     local changedOptions = false
--- If the addon has never been used, open the config window
+    -- If the addon has never been used, open the config window
     -- and disable the config window setting
     if options.configurationEnableWindow then
         ConfigurationWindow.open = true
@@ -262,26 +395,51 @@ local function present()
         return
     end
 
-    if options.xpTransparent then
-        imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
+    -- Create the separate text window if enabled
+    if options.xpTextEnableWindow
+        and (options.xpTextHideWhenMenu == false or IsMenuOpen() == false)
+        and (options.xpTextHideWhenSymbolChat == false or IsSymbolChatOpen() == false)
+        and (options.xpTextHideWhenMenuUnavailable == false or IsMenuUnavailable() == false)
+    then
+        if options.xpTextTransparent then
+            imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
+        end
+
+        if changedOptions == true then
+            imgui.SetNextWindowPos(options.xpTextX, options.xpTextY, "Always");
+        end
+
+        imgui.Begin("XP Stats", nil, { options.xpTextNoTitleBar, options.xpTextNoResize, options.xpTextNoMove, "AlwaysAutoResize" })
+        RenderStatsText(StatsWindow.currentLevel, StatsWindow.currentExp, StatsWindow.expToNextLevel)
+        imgui.End()
+
+        if options.xpTextTransparent then
+            imgui.PopStyleColor(1)
+        end
     end
 
-    if (options.xpEnableWindow)
+    -- Main progress bar window
+    if options.xpEnableWindow
         and (options.xpHideWhenMenu == false or IsMenuOpen() == false)
         and (options.xpHideWhenSymbolChat == false or IsSymbolChatOpen() == false)
         and (options.xpHideWhenMenuUnavailable == false or IsMenuUnavailable() == false)
     then
+        if options.xpTransparent then
+            imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
+        end
+
         if changedOptions == true then
             changedOptions = false
             imgui.SetNextWindowPos(options.xpBarX, options.xpBarY, "Always");
         end
+
         imgui.Begin("Experience Bar", nil, { options.xpNoTitleBar, options.xpNoResize, options.xpNoMove, "AlwaysAutoResize" })
         DrawStuff();
         imgui.End()
-    end
 
-    if options.xpTransparent then
-        imgui.PopStyleColor(1)
+        if options.xpTransparent then
+            imgui.PopStyleColor(1)
+        end
     end
 end
 
@@ -294,7 +452,6 @@ local function init()
     end
 
     core_mainmenu.add_button("XP Bar", mainMenuButtonHandler)
-
 
     return
     {

@@ -138,6 +138,11 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
 
+        if imgui.Checkbox("Vertical Bar", _configuration.xpVerticalBar) then
+            _configuration.xpVerticalBar = not _configuration.xpVerticalBar
+            this.changed = true
+        end
+
         local oldColor = _configuration.xpBarColor
         _configuration.xpBarColor = PresentColorEditor("XP bar color", _configuration.xpBarColor, 0xFFE6B300)
         if oldColor ~= _configuration.xpBarColor then
@@ -167,6 +172,78 @@ local function ConfigurationWindow(configuration)
             this.changed = true
         end
         imgui.PopItemWidth()
+
+        -- Text Window Settings section
+        if imgui.CollapsingHeader("Text Window Settings") then
+            -- Move the enable option here
+            if imgui.Checkbox("Enable Text Window", _configuration.xpTextEnableWindow) then
+                _configuration.xpTextEnableWindow = not _configuration.xpTextEnableWindow
+                this.changed = true
+            end
+
+            -- Only show these options if text window is enabled
+            if _configuration.xpTextEnableWindow then
+                if imgui.Checkbox("Hide text when menus are open", _configuration.xpTextHideWhenMenu) then
+                    _configuration.xpTextHideWhenMenu = not _configuration.xpTextHideWhenMenu
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Hide text when symbol chat/word select is open", _configuration.xpTextHideWhenSymbolChat) then
+                    _configuration.xpTextHideWhenSymbolChat = not _configuration.xpTextHideWhenSymbolChat
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Hide text when the menu is unavailable", _configuration.xpTextHideWhenMenuUnavailable) then
+                    _configuration.xpTextHideWhenMenuUnavailable = not _configuration.xpTextHideWhenMenuUnavailable
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Text window no title bar", _configuration.xpTextNoTitleBar == "NoTitleBar") then
+                    if _configuration.xpTextNoTitleBar == "NoTitleBar" then
+                        _configuration.xpTextNoTitleBar = ""
+                    else
+                        _configuration.xpTextNoTitleBar = "NoTitleBar"
+                    end
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Text window no resize", _configuration.xpTextNoResize == "NoResize") then
+                    if _configuration.xpTextNoResize == "NoResize" then
+                        _configuration.xpTextNoResize = ""
+                    else
+                        _configuration.xpTextNoResize = "NoResize"
+                    end
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Text window no move", _configuration.xpTextNoMove == "NoMove") then
+                    if _configuration.xpTextNoMove == "NoMove" then
+                        _configuration.xpTextNoMove = ""
+                    else
+                        _configuration.xpTextNoMove = "NoMove"
+                    end
+                    this.changed = true
+                end
+
+                if imgui.Checkbox("Text window transparent background", _configuration.xpTextTransparent) then
+                    _configuration.xpTextTransparent = not _configuration.xpTextTransparent
+                    this.changed = true
+                end
+
+                imgui.PushItemWidth(110)
+                changedDragInt, _configuration.xpTextX = imgui.DragInt("##TextX", _configuration.xpTextX, 1.0, 0, 0, "Text X: %4.0f")
+                if changedDragInt then
+                    this.changed = true
+                end
+
+                imgui.SameLine(0, 5)
+                changedDragInt, _configuration.xpTextY = imgui.DragInt("##TextY", _configuration.xpTextY, 1.0, 0, 0, "Text Y: %4.0f")
+                if changedDragInt then
+                    this.changed = true
+                end
+                imgui.PopItemWidth()
+            end
+        end
     end
 
     this.Update = function()
