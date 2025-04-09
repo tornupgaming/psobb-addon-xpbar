@@ -82,6 +82,7 @@ if optionsLoaded then
     options.xpEnableInfoTNL               = NotNilOrDefault(options.xpEnableInfoTNL, true)
     options.xpBarNoOverlay                = NotNilOrDefault(options.xpBarNoOverlay, false)
     options.xpBarColor                    = NotNilOrDefault(options.xpBarColor, 0xFFE6B300)
+    options.xpBarPercentColor             = NotNilOrDefault(options.xpBarPercentColor, 0xFFFFFFFF)
     options.xpBarX                        = NotNilOrDefault(options.xpBarX, 50)
     options.xpBarY                        = NotNilOrDefault(options.xpBarY, 50)
     options.xpBarWidth                    = NotNilOrDefault(options.xpBarWidth, -1)
@@ -116,6 +117,7 @@ else
         xpEnableInfoTNL = true,
         xpBarNoOverlay = false,
         xpBarColor = 0xFFE6B300,
+        xpBarPercentColor = 0xFFFFFFFF,
         xpBarX = 50,
         xpBarY = 50,
         xpBarWidth = -1,
@@ -157,6 +159,7 @@ local function SaveOptions(options)
         io.write(string.format("xpEnableInfoTNL = %s,\n", tostring(options.xpEnableInfoTNL)))
         io.write(string.format("xpBarNoOverlay = %s,\n", tostring(options.xpBarNoOverlay)))
         io.write(string.format("xpBarColor = 0x%08X,\n", options.xpBarColor))
+        io.write(string.format("xpBarPercentColor = 0x%08X,\n", options.xpBarPercentColor))
         io.write(string.format("xpBarX = %f,\n", options.xpBarX))
         io.write(string.format("xpBarY = %f,\n", options.xpBarY))
         io.write(string.format("xpBarWidth = %f,\n", options.xpBarWidth))
@@ -189,8 +192,9 @@ local function GetColorAsFloats(color)
     return { r = r, g = g, b = b, a = a }
 end
 
-local imguiProgressBar = function(progress, color)
+local imguiProgressBar = function(progress, color, percentColor)
     color = color or 0xE6B300FF
+    percentColor = percentColor or 0xFFFFFFFF
 
     if progress == nil then
         imgui.Text("imguiProgressBar() Invalid progress")
@@ -250,6 +254,10 @@ local imguiProgressBar = function(progress, color)
         if not options.xpBarNoOverlay and overlay == nil then
             local percentText = string.format("%d%%", math.floor(progress * 100))
 
+            -- Get and apply the custom percentage text color
+            local pc = GetColorAsFloats(percentColor)
+            imgui.PushStyleColor("Text", pc.r, pc.g, pc.b, pc.a)
+
             -- Calculate position for vertical text
             local charHeight = 14 -- Approximate height of each character
             local totalTextHeight = #percentText * charHeight
@@ -265,14 +273,27 @@ local imguiProgressBar = function(progress, color)
                 imgui.SetCursorPos(xPos, yPos)
                 imgui.Text(char)
             end
+
+            -- Pop the color style
+            imgui.PopStyleColor()
         end
 
         imgui.EndChild()
     else
         -- Original horizontal progress bar
         imgui.PushStyleColor("PlotHistogram", c.r, c.g, c.b, c.a)
-        imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
-        imgui.PopStyleColor()
+        
+        -- Apply custom percentage text color if we're showing percentage
+        if not options.xpBarNoOverlay and overlay == nil then
+            local pc = GetColorAsFloats(percentColor)
+            imgui.PushStyleColor("Text", pc.r, pc.g, pc.b, pc.a)
+            imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
+            imgui.PopStyleColor() -- Pop text color
+        else
+            imgui.ProgressBar(progress, options.xpBarWidth, options.xpBarHeight, overlay)
+        end
+        
+        imgui.PopStyleColor() -- Pop progress bar color
     end
 end
 
@@ -295,7 +316,7 @@ end
 local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, progressAsFraction)
     if options.xpVerticalBar then
         -- For vertical layout, put the bar on the left and text on the right
-        imguiProgressBar(progressAsFraction, options.xpBarColor)
+        imguiProgressBar(progressAsFraction, options.xpBarColor, options.xpBarPercentColor)
 
         -- Only show text in main window if not using separate text window
         if not options.xpTextEnableWindow then
@@ -307,7 +328,7 @@ local renderBarAndText = function(currentLevel, currentExp, expToNextLevel, prog
         end
     else
         -- Original horizontal layout
-        imguiProgressBar(progressAsFraction, options.xpBarColor)
+        imguiProgressBar(progressAsFraction, options.xpBarColor, options.xpBarPercentColor)
 
         -- Only show text in main window if not using separate text window
         if not options.xpTextEnableWindow then
@@ -456,7 +477,7 @@ local function init()
     return
     {
         name = "Experience Bar",
-        version = "1.4",
+        version = "1.4.1",
         author = "tornupgaming",
         description = "Displays your current character experience in a handy visual bar.",
         present = present,

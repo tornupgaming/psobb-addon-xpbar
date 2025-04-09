@@ -230,6 +230,12 @@ local function ConfigurationWindow(configuration)
                     this.changed = true
                 end
 
+                local oldPercentColor = _configuration.xpBarPercentColor
+                _configuration.xpBarPercentColor = PresentColorEditor("Percentage text color", _configuration.xpBarPercentColor, 0xFFFFFFFF)
+                if oldPercentColor ~= _configuration.xpBarPercentColor then
+                    this.changed = true
+                end
+                
                 imgui.PushItemWidth(110)
                 changedDragInt, _configuration.xpTextX = imgui.DragInt("##TextX", _configuration.xpTextX, 1.0, 0, 0, "Text X: %4.0f")
                 if changedDragInt then
