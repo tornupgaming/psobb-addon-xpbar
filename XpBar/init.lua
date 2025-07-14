@@ -231,7 +231,9 @@ local DrawStuff = function()
 
     local thisLevelExp = charTotalExp - thisMaxLevelExp
     local nextLevelexp = nextMaxLevelexp - thisMaxLevelExp
-    local expToNextLevel = nextMaxLevelexp - charTotalExp
+    -- In case a server patches max exp displayed in the menu to be uncapped, 
+    -- ensure the progress bar shows 100%.
+    local expToNextLevel = math.max(0, nextMaxLevelexp - charTotalExp)
     local progressAsFraction = 1
     if nextLevelexp ~= 0 then
         progressAsFraction = math.floor(100 * (thisLevelExp / nextLevelexp)) / 100
