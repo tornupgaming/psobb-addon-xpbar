@@ -88,16 +88,19 @@ if optionsLoaded then
     options.xpBarWidth                    = NotNilOrDefault(options.xpBarWidth, -1)
     options.xpBarHeight                   = NotNilOrDefault(options.xpBarHeight, 0)
     options.xpVerticalBar                 = NotNilOrDefault(options.xpVerticalBar, false)
-    options.xpTextEnableWindow            = NotNilOrDefault(options.xpTextEnableWindow, false)
-    options.xpTextHideWhenMenu            = NotNilOrDefault(options.xpTextHideWhenMenu, true)
-    options.xpTextHideWhenSymbolChat      = NotNilOrDefault(options.xpTextHideWhenSymbolChat, true)
-    options.xpTextHideWhenMenuUnavailable = NotNilOrDefault(options.xpTextHideWhenMenuUnavailable, true)
-    options.xpTextNoTitleBar              = NotNilOrDefault(options.xpTextNoTitleBar, "")
-    options.xpTextNoResize                = NotNilOrDefault(options.xpTextNoResize, "")
-    options.xpTextNoMove                  = NotNilOrDefault(options.xpTextNoMove, "")
-    options.xpTextTransparent             = NotNilOrDefault(options.xpTextTransparent, false)
-    options.xpTextX                       = NotNilOrDefault(options.xpTextX, 200)
-    options.xpTextY                       = NotNilOrDefault(options.xpTextY, 50)
+
+    -- Text window
+    options.textwindow_enable                   = NotNilOrDefault(options.textwindow_enable, false)
+    options.textwindow_hideWhenMenuOpen         = NotNilOrDefault(options.textwindow_hideWhenMenuOpen, true)
+    options.textwindow_hideWhenSymbolChatOpen   = NotNilOrDefault(options.textwindow_hideWhenSymbolChatOpen, true)
+    options.textwindow_hideWhenMenuNotAvailable = NotNilOrDefault(options.textwindow_hideWhenMenuNotAvailable, true)
+    options.textwindow_noTitleBar               = NotNilOrDefault(options.textwindow_noTitleBar, "")
+    options.textwindow_noResize                 = NotNilOrDefault(options.textwindow_noResize, "")
+    options.textwindow_noMove                   = NotNilOrDefault(options.textwindow_noMove, "")
+    options.textwindow_transparent              = NotNilOrDefault(options.textwindow_transparent, false)
+    options.textwindow_x                        = NotNilOrDefault(options.textwindow_x, 200)
+    options.textwindow_y                        = NotNilOrDefault(options.textwindow_y, 50)
+    options.textwindow_percentColor             = NotNilOrDefault(options.textwindow_percentColor, 0xFFFFFFFF)
 else
     options =
     {
@@ -123,16 +126,17 @@ else
         xpBarWidth = -1,
         xpBarHeight = 0,
         xpVerticalBar = false,
-        xpTextEnableWindow = false,
-        xpTextHideWhenMenu = true,
-        xpTextHideWhenSymbolChat = true,
-        xpTextHideWhenMenuUnavailable = true,
-        xpTextNoTitleBar = "",
-        xpTextNoResize = "",
-        xpTextNoMove = "",
-        xpTextTransparent = false,
-        xpTextX = 200,
-        xpTextY = 50,
+        textwindow_enable = false,
+        textwindow_hideWhenMenuOpen = true,
+        textwindow_hideWhenSymbolChatOpen = true,
+        textwindow_hideWhenMenuNotAvailable = true,
+        textwindow_noTitleBar = "",
+        textwindow_noResize = "",
+        textwindow_noMove = "",
+        textwindow_transparent = false,
+        textwindow_x = 200,
+        textwindow_y = 50,
+        textwindow_percentColor = 0xFFFFFFFF,
     }
 end
 
@@ -165,16 +169,17 @@ local function SaveOptions(options)
         io.write(string.format("xpBarWidth = %f,\n", options.xpBarWidth))
         io.write(string.format("xpBarHeight = %f,\n", options.xpBarHeight))
         io.write(string.format("xpVerticalBar = %s,\n", tostring(options.xpVerticalBar)))
-        io.write(string.format("xpTextEnableWindow = %s,\n", tostring(options.xpTextEnableWindow)))
-        io.write(string.format("xpTextHideWhenMenu = %s,\n", tostring(options.xpTextHideWhenMenu)))
-        io.write(string.format("xpTextHideWhenSymbolChat = %s,\n", tostring(options.xpTextHideWhenSymbolChat)))
-        io.write(string.format("xpTextHideWhenMenuUnavailable = %s,\n", tostring(options.xpTextHideWhenMenuUnavailable)))
-        io.write(string.format("xpTextNoTitleBar = \"%s\",\n", options.xpTextNoTitleBar))
-        io.write(string.format("xpTextNoResize = \"%s\",\n", options.xpTextNoResize))
-        io.write(string.format("xpTextNoMove = \"%s\",\n", options.xpTextNoMove))
-        io.write(string.format("xpTextTransparent = %s,\n", tostring(options.xpTextTransparent)))
-        io.write(string.format("xpTextX = %f,\n", options.xpTextX))
-        io.write(string.format("xpTextY = %f,\n", options.xpTextY))
+        io.write(string.format("textwindow_enable = %s,\n", tostring(options.textwindow_enable)))
+        io.write(string.format("textwindow_hideWhenMenuOpen = %s,\n", tostring(options.textwindow_hideWhenMenuOpen)))
+        io.write(string.format("textwindow_hideWhenSymbolChatOpen = %s,\n", tostring(options.textwindow_hideWhenSymbolChatOpen)))
+        io.write(string.format("textwindow_hideWhenMenuNotAvailable = %s,\n", tostring(options.textwindow_hideWhenMenuNotAvailable)))
+        io.write(string.format("textwindow_noTitleBar = \"%s\",\n", options.textwindow_noTitleBar))
+        io.write(string.format("textwindow_noResize = \"%s\",\n", options.textwindow_noResize))
+        io.write(string.format("textwindow_noMove = \"%s\",\n", options.textwindow_noMove))
+        io.write(string.format("textwindow_transparent = %s,\n", tostring(options.textwindow_transparent)))
+        io.write(string.format("textwindow_x = %f,\n", options.textwindow_x))
+        io.write(string.format("textwindow_y = %f,\n", options.textwindow_y))
+        io.write(string.format("textwindow_percentColor = 0x%08X,\n", options.textwindow_percentColor))
         io.write("}\n")
 
         io.close(file)
@@ -417,24 +422,24 @@ local function present()
     end
 
     -- Create the separate text window if enabled
-    if options.xpTextEnableWindow
-        and (options.xpTextHideWhenMenu == false or IsMenuOpen() == false)
-        and (options.xpTextHideWhenSymbolChat == false or IsSymbolChatOpen() == false)
-        and (options.xpTextHideWhenMenuUnavailable == false or IsMenuUnavailable() == false)
+    if options.textwindow_enable
+        and (options.textwindow_hideWhenMenuOpen == false or IsMenuOpen() == false)
+        and (options.textwindow_hideWhenSymbolChatOpen == false or IsSymbolChatOpen() == false)
+        and (options.textwindow_hideWhenMenuNotAvailable == false or IsMenuUnavailable() == false)
     then
-        if options.xpTextTransparent then
+        if options.textwindow_transparent then
             imgui.PushStyleColor("WindowBg", 0, 0, 0, 0)
         end
 
         if changedOptions == true then
-            imgui.SetNextWindowPos(options.xpTextX, options.xpTextY, "Always");
+            imgui.SetNextWindowPos(options.textwindow_x, options.textwindow_y, "Always");
         end
 
-        imgui.Begin("XP Stats", nil, { options.xpTextNoTitleBar, options.xpTextNoResize, options.xpTextNoMove, "AlwaysAutoResize" })
+        imgui.Begin("XP Stats", nil, { options.textwindow_noTitleBar, options.textwindow_noResize, options.textwindow_noMove, "AlwaysAutoResize" })
         RenderStatsText(StatsWindow.currentLevel, StatsWindow.currentExp, StatsWindow.expToNextLevel)
         imgui.End()
 
-        if options.xpTextTransparent then
+        if options.textwindow_transparent then
             imgui.PopStyleColor(1)
         end
     end
